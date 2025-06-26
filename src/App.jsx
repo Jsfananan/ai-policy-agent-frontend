@@ -1,6 +1,4 @@
-// src/App.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import botIcon from '../public/ai-policy-agent-icon.png';
+import React, { useState, useRef, useEffect } from 'react';
 
 const QUESTIONS = [
   {
@@ -41,9 +39,7 @@ const QUESTIONS = [
 ];
 
 export default function App() {
-  const [chat, setChat] = useState([
-    { role: 'bot', text: QUESTIONS[0].prompt }
-  ]);
+  const [chat, setChat] = useState([{ role: 'bot', text: QUESTIONS[0].prompt }]);
   const [step, setStep] = useState(0);
   const [input, setInput] = useState('');
   const [answers, setAnswers] = useState({});
@@ -60,31 +56,37 @@ export default function App() {
     if (!input.trim()) return;
     const q = QUESTIONS[step];
     const newAnswers = { ...answers, [q.id]: input };
-
-    const updatedChat = [
-      ...chat,
-      { role: 'user', text: input }
-    ];
+    const updatedChat = [...chat, { role: 'user', text: input }];
 
     if (step + 1 === QUESTIONS.length) {
-      updatedChat.push({ role: 'bot', text: '✅ Policy generated below — Brought to you by <a href="https://leadershipinchange10.substack.com" class="underline text-blue-700" target="_blank">Leadership in Change</a>' });
+      updatedChat.push({
+        role: 'bot',
+        text: '✅ Policy generated below — Brought to you by <a href="https://leadershipinchange10.substack.com" class="underline text-blue-700" target="_blank">Leadership in Change</a>'
+      });
       setChat(updatedChat);
-      setLoading(true);
       setStep(step + 1);
       setInput('');
       setAnswers(newAnswers);
-      const res = await fetch('https://b0171f93-2067-4348-814a-806bd385a885-00-pe0wbytc9iis.riker.replit.dev/generate-policy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId: 'session-' + Date.now(),
-          answers: Object.entries(newAnswers).map(([question, answer]) => ({ question, answer }))
-        })
-      });
-      const data = await res.json();
-      setPolicy(data.policy);
-      setLoading(false);
-      setComplete(true);
+      setLoading(true);
+
+      try {
+        const res = await fetch('https://b0171f93-2067-4348-814a-806bd385a885-00-pe0wbytc9iis.riker.replit.dev/generate-policy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId: 'session-' + Date.now(),
+            answers: Object.entries(newAnswers).map(([question, answer]) => ({ question, answer }))
+          })
+        });
+        const data = await res.json();
+        setPolicy(data.policy);
+        setLoading(false);
+        setComplete(true);
+      } catch (err) {
+        console.error('Error fetching policy:', err);
+        setPolicy('⚠️ Something went wrong. Please try again later.');
+        setLoading(false);
+      }
     } else {
       updatedChat.push({ role: 'bot', text: QUESTIONS[step + 1].prompt });
       setChat(updatedChat);
@@ -97,12 +99,13 @@ export default function App() {
   const renderFormattedPolicy = () => {
     const lines = policy.split('\n');
     return lines.map((line, idx) => {
-      if (line.trim().startsWith('**') && line.trim().endsWith('**')) {
-        return <h3 key={idx} className="text-lg font-semibold mt-4">{line.replace(/\*\*/g, '')}</h3>;
-      } else if (line.includes('___________________________')) {
-        return <p key={idx} className="mt-2 font-mono text-sm">{line}</p>;
+      const trimmed = line.trim();
+      if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
+        return <h3 key={idx} className="text-lg font-semibold mt-4">{trimmed.replace(/\*\*/g, '')}</h3>;
+      } else if (trimmed.includes('___________________________')) {
+        return <p key={idx} className="mt-2 font-mono text-sm">{trimmed}</p>;
       } else {
-        return <p key={idx} className="mt-2 whitespace-pre-line">{line}</p>;
+        return <p key={idx} className="mt-2 whitespace-pre-line">{trimmed}</p>;
       }
     });
   };
@@ -115,9 +118,8 @@ export default function App() {
           {chat.map((msg, i) => (
             <div
               key={i}
-              className={`p-3 rounded-xl ${msg.role === 'bot' ? 'bg-[#FDF6F2]' : 'bg-circuitryBlue text-white'} w-fit max-w-[80%] flex items-start gap-2`}
+              className={`p-3 rounded-xl ${msg.role === 'bot' ? 'bg-[#FDF6F2]' : 'bg-circuitryBlue text-white'} w-fit max-w-[80%]`}
             >
-              {msg.role === 'bot' && <img src="/ai-policy-agent-icon.png" alt="icon" className="w-6 h-6 mt-1" />} 
               <span dangerouslySetInnerHTML={{ __html: msg.text }} />
             </div>
           ))}
