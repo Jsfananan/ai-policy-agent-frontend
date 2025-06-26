@@ -139,20 +139,8 @@ if (reply.includes('AI Use Policy for')) {
               margin-bottom: 15px;
               color: #4a5568;
             }
-            .signature-section {
-              margin-top: 50px;
-              padding-top: 30px;
-              border-top: 2px solid #e2e8f0;
-            }
-            .signature-line {
-              border-bottom: 2px solid #4a5568;
-              height: 40px;
-              margin-bottom: 8px;
-            }
-            .signature-label {
-              font-size: 12px;
-              color: #718096;
-            }
+         
+        
             @media print {
               body { 
                 padding: 20px; 
