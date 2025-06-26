@@ -54,17 +54,20 @@ export default function App() {
   };
 
   const renderFormattedPolicy = () => {
-    const lines = formattedPolicy.split('\n');
-    return lines.map((line, idx) => {
-      if (line.trim().startsWith('1.') || line.trim().match(/^\d+\./)) {
-        return <h3 key={idx} className="text-lg font-semibold mt-4">{line}</h3>;
-      } else if (line.includes('___________________________')) {
-        return <p key={idx} className="mt-2 font-mono text-sm">{line}</p>;
-      } else {
-        return <p key={idx} className="mt-2">{line}</p>;
-      }
-    });
-  };
+  const lines = formattedPolicy.split('\n');
+  return lines.map((line, idx) => {
+    const content = line.trim();
+
+    if (/^\d+\./.test(content)) {
+      return React.createElement('h3', { key: idx, className: 'text-lg font-semibold mt-4' }, content);
+    } else if (content.includes('___________________________')) {
+      return React.createElement('p', { key: idx, className: 'mt-2 font-mono text-sm' }, content);
+    } else {
+      return React.createElement('p', { key: idx, className: 'mt-2' }, content);
+    }
+  });
+};
+
 
   return (
     <div className="bg-cardBackground min-h-screen p-6 text-olive font-sans">
