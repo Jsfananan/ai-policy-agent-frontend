@@ -40,10 +40,15 @@ export default function App() {
       const data = await res.json();
       let reply = data.reply;
 
+      // Clean policy formatting and strip headers
       if (reply.includes('Brought to you by Leadership in Change')) {
         setPolicyGenerated(true);
+        const cleanReply = reply
+          .replace('✅ Done! See below for your custom policy.', '')
+          .replace(/.*Brought to you by Leadership in Change.*/gi, '')
+          .trim();
+        setFormattedPolicy(cleanReply);
         reply = '✅ Done! See below for your custom policy.';
-        setFormattedPolicy(data.reply);
       }
 
       setMessages([...newMessages, { role: 'bot', text: reply }]);
@@ -105,13 +110,6 @@ export default function App() {
 
         {policyGenerated && (
           <div className="mt-6">
-            <p className="text-sm text-olive mb-2">
-              ✅ Policy generated below — Brought to you by{' '}
-              <a href="https://leadershipinchange10.substack.com" target="_blank" rel="noopener noreferrer" className="underline text-navy">
-                Leadership in Change
-              </a>
-            </p>
-
             <button
               className="bg-circuitryBlue hover:bg-candleGold hover:text-navy text-white px-4 py-2 mb-4 rounded"
               onClick={() => {
@@ -131,3 +129,4 @@ export default function App() {
     </div>
   );
 }
+
