@@ -62,15 +62,12 @@ const formatPolicyText = (text) => {
       const data = await res.json();
       let reply = data.reply;
 
-      if (reply.includes('Brought to you by Leadership in Change')) {
-        setPolicyGenerated(true);
-        const cleanReply = reply
-          .replace('✅ Done! See below for your custom policy.', '')
-          .replace(/.*Brought to you by Leadership in Change.*/gi, '')
-          .trim();
-        setFormattedPolicy(cleanReply);
-        reply = '✅ Done! See below for your custom policy.';
-      }
+if (reply.includes('AI Use Policy for')) {
+  setPolicyGenerated(true);
+  setFormattedPolicy(reply.trim());
+  reply = '✅ Policy generated below — Brought to you by [Leadership in Change](https://leadershipinchange10.substack.com)';
+}
+
 
       setMessages([...newMessages, { role: 'bot', text: reply }]);
     } catch (err) {
