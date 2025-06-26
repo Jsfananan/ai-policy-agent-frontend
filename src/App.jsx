@@ -21,8 +21,14 @@ export default function App() {
   const formatPolicyText = (text) => {
     if (!text) return '';
     
+    // Clean the text first - remove unwanted lines
+    let cleanText = text
+      .replace(/Great! Generating your policy now\.\.\./gi, '')
+      .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
+      .trim();
+    
     // Split into lines and process
-    const lines = text.split('\n').filter(line => line.trim());
+    const lines = cleanText.split('\n').filter(line => line.trim());
     let formattedHtml = '';
     let inList = false;
     
@@ -32,19 +38,30 @@ export default function App() {
       // Skip empty lines
       if (!trimmedLine) return;
       
-      // Main title (usually the first substantial line)
-      if (index === 0 && trimmedLine.toLowerCase().includes('policy')) {
-        formattedHtml += `<h1 class="text-3xl font-bold text-center mb-8 text-gray-800">${trimmedLine}</h1>`;
+      // Skip unwanted lines
+      if (trimmedLine.toLowerCase().includes('generating your policy') || 
+          trimmedLine.toLowerCase().includes('thank you for creating')) {
         return;
       }
       
-      // Section headers (lines that end with colon or are all caps)
-      if (trimmedLine.endsWith(':') || (trimmedLine === trimmedLine.toUpperCase() && trimmedLine.length > 3)) {
+      // Main title - looks for "AI Use Policy for" or similar
+      if (trimmedLine.toLowerCase().startsWith('ai use policy for') || 
+          trimmedLine.toLowerCase().startsWith('# ai use policy for') ||
+          trimmedLine.toLowerCase().startsWith('#### ai use policy for')) {
+        const cleanTitle = trimmedLine.replace(/^#+\s*/, '');
+        formattedHtml += `<h1 class="text-3xl font-bold text-center mb-8 text-navy">${cleanTitle}</h1>`;
+        return;
+      }
+      
+      // Section headers - look for #### format or specific section names
+      if (trimmedLine.startsWith('####') || 
+          /^(Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature):?\s*$/i.test(trimmedLine)) {
         if (inList) {
           formattedHtml += '</ul>';
           inList = false;
         }
-        formattedHtml += `<h2 class="text-xl font-semibold mt-6 mb-3 text-gray-700">${trimmedLine}</h2>`;
+        const cleanHeader = trimmedLine.replace(/^#+\s*/, '').replace(/:$/, '');
+        formattedHtml += `<h2 class="text-xl font-semibold mt-6 mb-3 text-navy">${cleanHeader}</h2>`;
         return;
       }
       
@@ -55,7 +72,7 @@ export default function App() {
           inList = true;
         }
         const cleanItem = trimmedLine.replace(/^[\s]*[-•*]\s/, '').replace(/^[\s]*\d+\.\s/, '');
-        formattedHtml += `<li class="text-gray-600 leading-relaxed">${cleanItem}</li>`;
+        formattedHtml += `<li class="text-olive leading-relaxed">${cleanItem}</li>`;
         return;
       }
       
@@ -67,9 +84,9 @@ export default function App() {
       
       // Check if it's a subsection or important note
       if (trimmedLine.length < 100 && (trimmedLine.includes('Note:') || trimmedLine.includes('Important:') || trimmedLine.includes('Remember:'))) {
-        formattedHtml += `<div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4"><p class="text-blue-800 font-medium">${trimmedLine}</p></div>`;
+        formattedHtml += `<div class="bg-[#f9eae1] border-l-4 border-candleGold p-3 mb-4"><p class="text-navy font-medium">${trimmedLine}</p></div>`;
       } else {
-        formattedHtml += `<p class="mb-4 text-gray-600 leading-relaxed">${trimmedLine}</p>`;
+        formattedHtml += `<p class="mb-4 text-olive leading-relaxed">${trimmedLine}</p>`;
       }
     });
     
@@ -195,9 +212,9 @@ export default function App() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6 text-gray-800 font-sans">
+    <div className="bg-cardBackground min-h-screen p-6 text-olive font-sans">
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
-        <h1 className="text-2xl font-serif text-gray-800">AI Policy Agent</h1>
+        <h1 className="text-2xl font-serif text-navy">AI Policy Agent</h1>
         
         <div className="space-y-3">
           {messages.map((msg, i) => (
@@ -207,13 +224,11 @@ export default function App() {
             >
               <div className={`flex items-start gap-2 ${
                 msg.role === 'bot' 
-                  ? 'bg-blue-50 text-gray-700' 
-                  : 'bg-blue-600 text-white'
+                  ? 'bg-[#f9eae1]' 
+                  : 'bg-circuitryBlue text-white'
               } p-3 rounded-xl w-fit max-w-[80%]`}>
                 {msg.role === 'bot' && (
-                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm mt-1">
-                    AI
-                  </div>
+                  <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
                 )}
                 <span className="whitespace-pre-line leading-relaxed">{msg.text}</span>
               </div>
@@ -228,12 +243,12 @@ export default function App() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-              className="border border-gray-300 p-3 rounded-lg flex-grow focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 p-3 rounded-lg flex-grow focus:outline-none focus:ring-2 focus:ring-circuitryBlue"
               placeholder="Type your answer..."
             />
             <button
               onClick={sendMessage}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+              className="bg-circuitryBlue hover:bg-candleGold hover:text-navy text-white px-6 py-3 rounded-lg font-medium"
             >
               Send
             </button>
@@ -244,13 +259,13 @@ export default function App() {
           <div className="mt-6">
             <div className="flex gap-3 mb-6">
               <button
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+                className="bg-circuitryBlue hover:bg-candleGold hover:text-navy text-white px-6 py-3 rounded-lg font-medium"
                 onClick={copyToClipboard}
               >
                 📋 Copy to Clipboard
               </button>
               <button
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium"
+                className="bg-circuitryBlue hover:bg-candleGold hover:text-navy text-white px-6 py-3 rounded-lg font-medium"
                 onClick={handlePrint}
               >
                 🖨️ Print Policy
