@@ -1,34 +1,13 @@
 import React, { useState } from 'react';
 
 const QUESTIONS = [
-  {
-    id: 'name',
-    prompt: "Let’s start with your name or your organization’s name. And how would you describe yourself? Pick one: 1. Solopreneur, 2. Team, 3. Business, 4. Nonprofit, 5. Church",
-  },
-  {
-    id: 'industry',
-    prompt: "What industry or space do you work in? Examples: Church, Education, Healthcare, Creator, Ecommerce, Consulting…",
-  },
-  {
-    id: 'tools',
-    prompt: "What AI tools do you or your team plan to use? (e.g., ChatGPT, Claude, Midjourney). Also, do you want to allow: 1. Any AI tools, 2. Only pre-approved ones?",
-  },
-  {
-    id: 'brand',
-    prompt: "Should AI-generated content follow your brand guide? (Yes or No). If yes, can you share the link?",
-  },
-  {
-    id: 'who',
-    prompt: "Who should be allowed to use AI tools? 1. Anyone on the team, 2. Only trained staff, 3. Leadership only. Should users sign this policy before they start using AI? (Yes or No)",
-  },
-  {
-    id: 'images',
-    prompt: "Should AI-made images include a small note or label saying they were AI-generated? (Yes or No)",
-  },
-  {
-    id: 'prohibited',
-    prompt: "Are there any areas where AI should not be used in your work? I’ll suggest a list based on your industry—you can say numbers or type ‘none’.",
-  }
+  { id: 'name', prompt: "Let’s start with your name or your organization’s name. And how would you describe yourself? Pick one: 1. Solopreneur, 2. Team, 3. Business, 4. Nonprofit, 5. Church" },
+  { id: 'industry', prompt: "What industry or space do you work in? Examples: Church, Education, Healthcare, Creator, Ecommerce, Consulting…" },
+  { id: 'tools', prompt: "What AI tools do you or your team plan to use? (e.g., ChatGPT, Claude, Midjourney). Also, do you want to allow: 1. Any AI tools, 2. Only pre-approved ones?" },
+  { id: 'brand', prompt: "Should AI-generated content follow your brand guide? (Yes or No). If yes, can you share the link?" },
+  { id: 'who', prompt: "Who should be allowed to use AI tools? 1. Anyone on the team, 2. Only trained staff, 3. Leadership only. Should users sign this policy before they start using AI? (Yes or No)" },
+  { id: 'images', prompt: "Should AI-made images include a small note or label saying they were AI-generated? (Yes or No)" },
+  { id: 'prohibited', prompt: "Are there any areas where AI should not be used in your work? I’ll suggest a list based on your industry—you can say numbers or type ‘none’." }
 ];
 
 export default function App() {
@@ -48,7 +27,7 @@ export default function App() {
     setAnswers(newAnswers);
     if (step + 1 === QUESTIONS.length) {
       setLoading(true);
-      const res = await fetch('https://your-backend-url.repl.co/generate-policy', {
+      const res = await fetch('https://YOUR-BACKEND-URL.repl.co/generate-policy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: 'session-' + Date.now(), answers: Object.entries(newAnswers).map(([question, answer]) => ({ question, answer })) })
@@ -66,7 +45,7 @@ export default function App() {
         <h1 className="text-2xl font-serif text-navy">AI Policy Agent</h1>
         <div className="space-y-3">
           {chat.map((msg, i) => (
-            <div key={i} className={\`p-3 rounded-xl \${msg.role === 'bot' ? 'bg-cardBackground' : 'bg-circuitryBlue text-white'} w-fit max-w-[80%]\`}>
+            <div key={i} className={`p-3 rounded-xl ${msg.role === 'bot' ? 'bg-cardBackground' : 'bg-circuitryBlue text-white'} w-fit max-w-[80%]`}>
               {msg.text}
             </div>
           ))}
