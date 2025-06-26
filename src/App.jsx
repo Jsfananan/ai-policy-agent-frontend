@@ -73,7 +73,7 @@ export default function App() {
       setStep(step + 1);
       setInput('');
       setAnswers(newAnswers);
-      const res = await fetch('https://1d5a4792-f01f-494d-b1bb-d4b3ed55955a-00-2ta5705jlpzty.janeway.replit.dev/generate-policy', {
+      const res = await fetch('https://b0171f93-2067-4348-814a-806bd385a885-00-pe0wbytc9iis.riker.replit.dev/generate-policy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
