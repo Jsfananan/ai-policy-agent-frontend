@@ -40,7 +40,6 @@ export default function App() {
       const data = await res.json();
       let reply = data.reply;
 
-      // Clean policy formatting and strip headers
       if (reply.includes('Brought to you by Leadership in Change')) {
         setPolicyGenerated(true);
         const cleanReply = reply
@@ -63,8 +62,8 @@ export default function App() {
     return lines.map((line, idx) => {
       const trimmed = line.trim();
       if (trimmed.startsWith('AI Use Policy for')) {
-        return <h2 key={idx} className="text-xl font-bold mt-6 mb-2">{trimmed}</h2>;
-      } else if (trimmed.match(/^\d+\./)) {
+        return <h2 key={idx} className="text-2xl font-bold mt-6 mb-2">{trimmed}</h2>;
+      } else if (['Purpose','Scope','Why This Matters','Approved AI Tools','Who May Use AI','Required Human Review','Prohibited Use','Image Guidelines','Verification Responsibility','Policy Review','Agreement & Signature','Definitions'].some(title => trimmed === title)) {
         return <h3 key={idx} className="text-lg font-semibold mt-4">{trimmed}</h3>;
       } else if (trimmed.includes('___________________________')) {
         return <p key={idx} className="mt-2 font-mono text-sm">{trimmed}</p>;
@@ -129,4 +128,3 @@ export default function App() {
     </div>
   );
 }
-
