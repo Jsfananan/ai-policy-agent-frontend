@@ -73,7 +73,7 @@ export default function App() {
 
         <div className="space-y-3">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex items-start gap-2 ${msg.role === 'bot' ? 'bg-[#f9eae1]' : 'bg-circuitryBlue text-white'} p-3 rounded-xl w-fit max-w-[80%]`}>
+            <div key={i} className={`flex items-start gap-2 ${msg.role === 'bot' ? 'bg-[#fdf6f2]' : 'bg-circuitryBlue text-white'} p-3 rounded-xl w-fit max-w-[80%]`}>
               {msg.role === 'bot' && (
                 <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
               )}
