@@ -4,7 +4,7 @@ export default function App() {
   const [messages, setMessages] = useState([
     {
       role: 'bot',
-      text: "Hi there! I’m your AI Policy Agent—here to help you create a clear, customized AI Use Policy. With the rise of tools like ChatGPT and Midjourney, it’s more important than ever to set healthy boundaries and expectations.\n\nLet’s get started—what’s the name of the organization or individual this policy is for?"
+      text: "Hi there! I’m your AI Policy Agent—here to help you create a clear, customized AI Use Policy.\n\nWith the rise of tools like ChatGPT and Midjourney, it’s more important than ever to set healthy boundaries and expectations.\n\nLet’s get started—what’s the name of the organization or individual this policy is for?"
     }
   ]);
   const [input, setInput] = useState('');
@@ -80,7 +80,7 @@ export default function App() {
               {msg.role === 'bot' && (
                 <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
               )}
-              <span>{msg.text}</span>
+              <span className="whitespace-pre-line leading-relaxed">{msg.text}</span>
             </div>
           ))}
         </div>
