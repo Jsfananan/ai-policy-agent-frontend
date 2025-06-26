@@ -256,43 +256,7 @@ if (reply.includes('AI Use Policy for')) {
               >
                 📋 Copy to Clipboard
               </button>
-              <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{backgroundColor: colors.circuitryBlue}}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = colors.candleGold;
-                  e.target.style.color = colors.navy;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = colors.circuitryBlue;
-                  e.target.style.color = 'white';
-                }}
-                onClick={handlePrint}
-              >
-                🖨️ Print Policy
-              </button>
-              <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{backgroundColor: colors.navy}}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = colors.candleGold;
-                  e.target.style.color = colors.navy;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = colors.navy;
-                  e.target.style.color = 'white';
-                }}
-                onClick={() => {
-                  setPolicyGenerated(false);
-                  setFormattedPolicy('');
-                  setMessages([{
-                    role: 'bot',
-                    text: "Hi there! I'm your AI Policy Agent—here to help you create a clear, customized AI Use Policy.\n\nWith the rise of tools like ChatGPT and Midjourney, it's more important than ever to set healthy boundaries and expectations.\n\nLet's get started—what's the name of the organization or individual this policy is for?"
-                  }]);
-                }}
-              >
-                🔄 Create New Policy
-              </button>
+            
             </div>
             
             <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
