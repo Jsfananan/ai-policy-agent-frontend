@@ -13,114 +13,98 @@ function App() {
   const [formattedPolicy, setFormattedPolicy] = useState('');
   const bottomRef = useRef(null);
 
-  const colors = {
-    cardBackground: '#f5f5dc',
-    olive: '#6b7280',
-    navy: '#1e3a8a',
-    circuitryBlue: '#3b82f6',
-    candleGold: '#f59e0b',
-    warmCream: '#f9eae1'
-  };
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-const formatPolicyText = (text) => {
-  if (!text) return '';
+  const formatPolicyText = (text) => {
+    if (!text) return '';
 
-  const cleanText = text
-    .replace(/Great! Generating your policy now\.\.\./gi, '')
-    .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
-    .replace(/If you need further adjustments or have any questions, feel free to ask\./gi, '')
-    .trim();
+    const cleanText = text
+      .replace(/Great! Generating your policy now\.{3}/gi, '')
+      .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
+      .replace(/If you need further adjustments or have any questions, feel free to ask\./gi, '')
+      .trim();
 
-  const lines = cleanText.split('\n');
-  let html = '';
-  let sectionNumber = 1;
-  let inList = false;
+    const lines = cleanText.split('\n');
+    let html = '';
+    let sectionNumber = 1;
+    let inList = false;
 
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) {
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        html += '<br />';
+        return;
+      }
+
+      if (/^AI Use Policy for/i.test(trimmed)) {
+        html += `<h1>${trimmed}</h1>`;
+        return;
+      }
+
+      if (/^•|^-|^\*/.test(trimmed)) {
+        if (!inList) {
+          html += '<ul>';
+          inList = true;
+        }
+        html += `<li>${trimmed.replace(/^[-•*]\s*/, '')}</li>`;
+        return;
+      }
+
+      const sectionHeaders = [
+        'Purpose', 'Scope', 'Industry Context', 'AI Tools Used',
+        'Tool Access Policy', 'Brand Guidelines', 'Who Can Use AI',
+        'Human Review Requirement', 'Fact/Quote Verification',
+        'Prohibited Use Areas', 'Policy Review Schedule',
+        'Image Disclaimers', 'Data Privacy and Member Protection',
+        'Responsible Innovation'
+      ];
+
+      if (sectionHeaders.some(h => trimmed.startsWith(h))) {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        html += `<h2>${sectionNumber++}. ${trimmed}</h2>`;
+        return;
+      }
+
+      if (/^Definitions$/i.test(trimmed)) {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        html += `<h2>${sectionNumber++}. ${trimmed}</h2>`;
+        return;
+      }
+
       if (inList) {
         html += '</ul>';
         inList = false;
       }
-      html += '<br />';
-      return;
-    }
+      html += `<p>${trimmed}</p>`;
+    });
 
-    // Title
-    if (/^AI Use Policy for/i.test(trimmed)) {
-      html += `<h1>${trimmed}</h1>`;
-      return;
-    }
-
-    // Definitions section or list item
-    if (/^•|^-|^\*/.test(trimmed)) {
-      if (!inList) {
-        html += '<ul>';
-        inList = true;
-      }
-      html += `<li>${trimmed.replace(/^[-•*]\s*/, '')}</li>`;
-      return;
-    }
-
-    // Numbered section headers
-    const sectionHeaders = [
-      'Purpose', 'Scope', 'Industry Context', 'AI Tools Used',
-      'Tool Access Policy', 'Brand Guidelines', 'Who Can Use AI',
-      'Human Review Requirement', 'Fact/Quote Verification',
-      'Prohibited Use Areas', 'Policy Review Schedule',
-      'Image Disclaimers', 'Data Privacy and Member Protection',
-      'Responsible Innovation'
-    ];
-
-    if (sectionHeaders.some(h => trimmed.startsWith(h))) {
-      if (inList) {
-        html += '</ul>';
-        inList = false;
-      }
-      html += `<h2>${sectionNumber++}. ${trimmed}</h2>`;
-      return;
-    }
-
-    // Definitions section
-    if (/^Definitions$/i.test(trimmed)) {
-      if (inList) {
-        html += '</ul>';
-        inList = false;
-      }
-      html += `<h2>${sectionNumber++}. ${trimmed}</h2>`;
-      return;
-    }
-
-    // Regular paragraph
     if (inList) {
       html += '</ul>';
-      inList = false;
     }
-    html += `<p>${trimmed}</p>`;
-  });
 
-  if (inList) {
-    html += '</ul>';
-  }
+    html += `
+      <h2>User Acknowledgement & Signature</h2>
+      <p>By signing below, I acknowledge that I have read, understood, and agreed to follow the AI Use Policy outlined above.</p>
+      <p>Name: ___________________________</p>
+      <p>Title/Role: ___________________________</p>
+      <p>Signature: ___________________________</p>
+      <p>Date: ___________________________</p>
+    `;
 
-  // Add User Acknowledgement Section
-  html += `
-    <h2>User Acknowledgement & Signature</h2>
-    <p>By signing below, I acknowledge that I have read, understood, and agreed to follow the AI Use Policy outlined above.</p>
-    <p>Name: ___________________________</p>
-    <p>Title/Role: ___________________________</p>
-    <p>Signature: ___________________________</p>
-    <p>Date: ___________________________</p>
-  `;
-
-  return html;
-};
-
+    return html;
+  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -171,7 +155,55 @@ const formatPolicyText = (text) => {
   const handlePrint = () => {
     const printWindow = window.open('', '_blank');
     const formattedHtml = formatPolicyText(formattedPolicy);
-    printWindow.document.write(`<!DOCTYPE html><html><head><title>AI Use Policy</title></head><body>${formattedHtml}</body></html>`);
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>AI Use Policy</title>
+          <style>
+            body {
+              font-family: 'Georgia', 'Times New Roman', serif;
+              color: #2c3e50;
+              line-height: 1.8;
+              max-width: 700px;
+              margin: 0 auto;
+              padding: 40px 20px;
+            }
+            h1 {
+              text-align: center;
+              font-size: 24px;
+              font-weight: bold;
+              margin-bottom: 40px;
+            }
+            h2 {
+              font-size: 18px;
+              font-weight: bold;
+              margin-top: 30px;
+              margin-bottom: 10px;
+            }
+            p {
+              margin-bottom: 12px;
+            }
+            ul {
+              margin-left: 20px;
+              margin-bottom: 12px;
+            }
+            li {
+              margin-bottom: 8px;
+            }
+            @media print {
+              body {
+                font-size: 12pt;
+                padding: 20px;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          ${formattedHtml}
+        </body>
+      </html>
+    `);
     printWindow.document.close();
     printWindow.print();
   };
@@ -183,9 +215,9 @@ const formatPolicyText = (text) => {
   };
 
   return (
-    <div style={{ backgroundColor: colors.cardBackground }} className="min-h-screen p-6 font-sans" style={{ color: colors.olive }}>
+    <div className="min-h-screen p-6 font-sans bg-[#f5f5dc] text-[#6b7280]">
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
-        <h1 className="text-2xl font-serif" style={{ color: colors.navy }}>AI Policy Agent</h1>
+        <h1 className="text-2xl font-serif text-[#1e3a8a]">AI Policy Agent</h1>
 
         <div className="space-y-3">
           {messages.map((msg, i) => (
@@ -193,8 +225,8 @@ const formatPolicyText = (text) => {
               <div
                 className={`flex items-start gap-2 p-3 rounded-xl w-fit max-w-[80%]`}
                 style={{
-                  backgroundColor: msg.role === 'bot' ? colors.warmCream : colors.circuitryBlue,
-                  color: msg.role === 'bot' ? colors.olive : 'white'
+                  backgroundColor: msg.role === 'bot' ? '#f9eae1' : '#3b82f6',
+                  color: msg.role === 'bot' ? '#6b7280' : 'white'
                 }}>
                 {msg.role === 'bot' && (
                   <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
@@ -218,15 +250,7 @@ const formatPolicyText = (text) => {
             <button
               onClick={sendMessage}
               className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:opacity-90"
-              style={{ backgroundColor: colors.circuitryBlue }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = colors.candleGold;
-                e.target.style.color = colors.navy;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = colors.circuitryBlue;
-                e.target.style.color = 'white';
-              }}>
+              style={{ backgroundColor: '#3b82f6' }}>
               Send
             </button>
           </div>
@@ -236,27 +260,24 @@ const formatPolicyText = (text) => {
           <div className="mt-6">
             <div className="flex gap-3 mb-6 flex-wrap">
               <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{ backgroundColor: colors.circuitryBlue }}
+                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200"
+                style={{ backgroundColor: '#3b82f6' }}
                 onClick={copyToClipboard}>
                 📋 Copy to Clipboard
               </button>
               <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{ backgroundColor: colors.circuitryBlue }}
+                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200"
+                style={{ backgroundColor: '#3b82f6' }}
                 onClick={handlePrint}>
                 🖨️ Print Policy
               </button>
               <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{ backgroundColor: colors.navy }}
+                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200"
+                style={{ backgroundColor: '#1e3a8a' }}
                 onClick={() => {
                   setPolicyGenerated(false);
                   setFormattedPolicy('');
-                  setMessages([{
-                    role: 'bot',
-                    text: "Hi there! I'm your AI Policy Agent—here to help you create a clear, customized AI Use Policy.\n\nWith the rise of tools like ChatGPT and Midjourney, it's more important than ever to set healthy boundaries and expectations.\n\nLet's get started—what's the name of the organization or individual this policy is for?"
-                  }]);
+                  setMessages([messages[0]]);
                 }}>
                 🔄 Create New Policy
               </button>
@@ -265,8 +286,14 @@ const formatPolicyText = (text) => {
             <div className="mt-4 border-t pt-4">
               <h2 className="text-xl font-semibold mb-4 text-black">📄 Your Custom AI Use Policy</h2>
               <div
-                className="text-black leading-relaxed space-y-4"
-                style={{ whiteSpace: 'pre-wrap' }}
+                style={{
+                  fontFamily: "'Georgia', 'Times New Roman', serif",
+                  fontSize: '16px',
+                  lineHeight: '1.8',
+                  color: '#2c3e50',
+                  whiteSpace: 'pre-wrap',
+                  padding: '20px'
+                }}
                 dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
               />
             </div>
@@ -278,4 +305,3 @@ const formatPolicyText = (text) => {
 }
 
 export default App;
-
