@@ -62,24 +62,6 @@ export default function App() {
     }
   };
 
-  const renderFormattedPolicy = () => {
-    const lines = formattedPolicy.split('\n');
-    return lines.map((line, idx) => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('AI Use Policy for')) {
-        return <h2 key={idx} className="text-2xl font-bold mt-6 mb-2">{trimmed}</h2>;
-      } else if ([
-        'Purpose','Scope','Why This Matters','Approved AI Tools','Who May Use AI','Required Human Review','Prohibited Use','Image Guidelines','Verification Responsibility','Policy Review','Agreement & Signature','Definitions'
-      ].some(title => trimmed === title)) {
-        return <h3 key={idx} className="text-lg font-semibold mt-4">{trimmed}</h3>;
-      } else if (trimmed.includes('___________________________')) {
-        return <p key={idx} className="mt-2 font-mono text-sm">{trimmed}</p>;
-      } else {
-        return <p key={idx} className="mt-2 whitespace-pre-line leading-relaxed">{trimmed}</p>;
-      }
-    });
-  };
-
   return (
     <div className="bg-cardBackground min-h-screen p-6 text-olive font-sans">
       <div className="max-w-2xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
@@ -132,8 +114,8 @@ export default function App() {
               📋 Copy to Clipboard
             </button>
 
-            <div className="bg-[#fcf7f4] p-4 rounded-md space-y-2">
-              {renderFormattedPolicy()}
+            <div className="prose prose-lg font-serif max-w-none bg-white p-6 rounded shadow-sm">
+              <pre className="whitespace-pre-wrap text-olive font-sans">{formattedPolicy}</pre>
             </div>
           </div>
         )}
