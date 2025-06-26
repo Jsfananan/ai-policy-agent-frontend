@@ -26,111 +26,86 @@ function App() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const formatPolicyText = (text) => {
-    if (!text) return '';
-    let cleanText = text
-      .replace(/Great! Generating your policy now\.\.\./gi, '')
-      .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
-      .replace(/Thank you for using the AI Policy Agent.*$/gi, '')
-      .replace(/If you need further adjustments.*$/gi, '')
-      .trim();
+ const formatPolicyText = (text) => {
+  if (!text) return '';
 
-    const lines = cleanText.split('\n');
-    let formattedHtml = '';
-    let inList = false;
-    let sectionCount = 0;
-    let signatureAdded = false;
+  // Remove unwanted lines
+  let cleanText = text
+    .replace(/Great! Generating your policy now\.\.\./gi, '')
+    .replace(/Thank you for (creating|taking the time to create).*AI Use Policy.*$/gi, '')
+    .replace(/If you need further adjustments.*$/gi, '')
+    .trim();
 
-    lines.forEach((line) => {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) {
-        if (inList) {
-          formattedHtml += '</ul>';
-          inList = false;
-        }
-        return;
-      }
+  const lines = cleanText.split('\n');
+  let html = '';
+  let inList = false;
 
-      if (trimmedLine.toLowerCase().includes('signature') && trimmedLine.length < 50) return;
+  lines.forEach((line) => {
+    const trimmed = line.trim();
 
-      if (trimmedLine.toLowerCase().includes('ai use policy for')) {
-        const cleanTitle = trimmedLine.replace(/^#+\s*/, '');
-        formattedHtml += `
-          <div class="border-b-3 pb-4 mb-8" style="border-bottom: 3px solid black;">
-            <h1 class="text-4xl font-bold text-center mb-2" style="color: black;">${cleanTitle}</h1>
-            <div class="w-24 h-1 mx-auto" style="background-color: black;"></div>
-          </div>`;
-        sectionCount++;
-        return;
-      }
-
-      if (/^(\#{2,}|[*_]{2}|)(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|User Access|Image Disclaimers|Verification Statement|Review and Updates|User Guidelines):?(\*{2}|)$/i.test(trimmedLine)) {
-        if (inList) {
-          formattedHtml += '</ul>';
-          inList = false;
-        }
-        const cleanHeader = trimmedLine.replace(/^#+\s*/, '').replace(/\*\*/g, '').replace(/:$/, '');
-        sectionCount++;
-        formattedHtml += `
-          <div class="mt-8 mb-4">
-            <h2 class="text-2xl font-semibold pl-4 mb-3" style="color: black; border-left: 4px solid black;">${cleanHeader}</h2>
-          </div>`;
-        return;
-      }
-
-      if (trimmedLine.endsWith(':') && trimmedLine.length < 50) {
-        if (inList) {
-          formattedHtml += '</ul>';
-          inList = false;
-        }
-        formattedHtml += `<h3 class="text-lg font-medium mt-4 mb-2" style="color: black;">${trimmedLine}</h3>`;
-        return;
-      }
-
-      if (/^[\s]*[-•*]\s/.test(trimmedLine) || /^[\s]*\d+\.\s/.test(trimmedLine)) {
-        if (!inList) {
-          formattedHtml += '<ul class="list-none mb-6 space-y-3 ml-4">';
-          inList = true;
-        }
-        const cleanItem = trimmedLine.replace(/^[\s]*[-•*]\s/, '').replace(/^[\s]*\d+\.\s/, '');
-        formattedHtml += `<li class="flex items-start"><span style="color: black;" class="mr-3 font-bold">•</span><span style="color: black;" class="leading-relaxed text-justify">${cleanItem}</span></li>`;
-        return;
-      }
-
+    // Skip empty lines
+    if (!trimmed) {
       if (inList) {
-        formattedHtml += '</ul>';
+        html += '</ul>';
         inList = false;
       }
-
-      if (/Note:|Important:|Remember:/i.test(trimmedLine)) {
-        formattedHtml += `
-          <div class="rounded-lg p-4 mb-6 shadow-sm" style="background: #f9f9f9; border: 1px solid black;">
-            <p class="font-medium flex items-center" style="color: black;">
-              <span style="color: black;" class="mr-2">⚠️</span>${trimmedLine}
-            </p>
-          </div>`;
-      } else {
-        const clean = trimmedLine.replace(/\*\*(.*?)\*\*/g, '$1');
-        formattedHtml += `<p class="mb-4 leading-relaxed text-justify" style="color: black;">${clean}</p>`;
-      }
-    });
-
-    if (inList) formattedHtml += '</ul>';
-
-    if (!signatureAdded) {
-      formattedHtml += `
-        <div class="mt-12 pt-8 border-t-2 border-gray-300">
-          <h2 class="text-2xl font-semibold pl-4 mb-6" style="color: black; border-left: 4px solid black;">Signature</h2>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-            <div><div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div><p class="text-sm" style="color: black;">Name (Print)</p></div>
-            <div><div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div><p class="text-sm" style="color: black;">Signature</p></div>
-            <div><div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div><p class="text-sm" style="color: black;">Date</p></div>
-          </div>
-        </div>`;
+      return;
     }
 
-    return formattedHtml;
-  };
+    // Bold subtitles: short lines ending in colon or known header
+    if (
+      trimmed.length < 60 &&
+      (trimmed.endsWith(':') ||
+        /^(Purpose|Scope|Definitions|Guidelines|Implementation|Review|Permitted Uses|Prohibited Uses|Policy Statement|Signature)$/i.test(trimmed))
+    ) {
+      html += `<p style="font-size:12pt; color:black;"><strong>${trimmed}</strong></p>`;
+      return;
+    }
+
+    // List item
+    if (/^[-•*]\s/.test(trimmed)) {
+      if (!inList) {
+        html += '<ul style="margin-left:1.5em; padding-left:0; margin-bottom:1em;">';
+        inList = true;
+      }
+      const item = trimmed.replace(/^[-•*]\s/, '');
+      html += `<li style="font-size:12pt; color:black;">• ${item}</li>`;
+      return;
+    }
+
+    // Normal paragraph
+    if (inList) {
+      html += '</ul>';
+      inList = false;
+    }
+
+    html += `<p style="font-size:12pt; color:black;">${trimmed}</p>`;
+  });
+
+  if (inList) html += '</ul>';
+
+  // Add clean signature block
+  html += `
+    <div style="margin-top:2em;">
+      <p style="font-size:12pt; color:black;"><strong>Signature</strong></p>
+      <div style="margin-top:1.5em;">
+        <div style="border-bottom:1px solid black; height:2em;"></div>
+        <p style="font-size:12pt; color:black;">Name (Print)</p>
+      </div>
+      <div style="margin-top:1.5em;">
+        <div style="border-bottom:1px solid black; height:2em;"></div>
+        <p style="font-size:12pt; color:black;">Signature</p>
+      </div>
+      <div style="margin-top:1.5em;">
+        <div style="border-bottom:1px solid black; height:2em;"></div>
+        <p style="font-size:12pt; color:black;">Date</p>
+      </div>
+    </div>
+  `;
+
+  return html;
+};
+
 
   const getPlainTextPolicy = (text) => {
     return text
