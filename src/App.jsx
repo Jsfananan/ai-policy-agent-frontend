@@ -26,69 +26,101 @@ function App() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const formatPolicyText = (text) => {
-    if (!text) return '';
+const formatPolicyText = (text) => {
+  if (!text) return '';
 
-    const cleanText = text
-      .replace(/Great! Generating your policy now\.{3}/gi, '')
-      .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
-      .replace(/If you need further adjustments or have any questions, feel free to ask\./gi, '')
-      .trim();
+  const cleanText = text
+    .replace(/Great! Generating your policy now\.\.\./gi, '')
+    .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
+    .replace(/If you need further adjustments or have any questions, feel free to ask\./gi, '')
+    .trim();
 
-    const lines = cleanText.split('\n');
-    let html = '';
-    let inList = false;
+  const lines = cleanText.split('\n');
+  let html = '';
+  let sectionNumber = 1;
+  let inList = false;
 
-    lines.forEach((line) => {
-      const trimmed = line.trim();
-      if (!trimmed) {
-        if (inList) {
-          html += '</ul>';
-          inList = false;
-        }
-        html += '<br />';
-        return;
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
       }
-
-      if (/^AI Use Policy for/i.test(trimmed)) {
-        html += `<h1>${trimmed}</h1>`;
-      } else if (/^(Purpose|Scope|Definitions|Guidelines|Implementation|Review|Signature|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|User Authorization|User Access|Image Disclaimers|Policy Statement|Human Review|Verification Statement|Review and Updates)[:]?$/i.test(trimmed)) {
-        if (inList) {
-          html += '</ul>';
-          inList = false;
-        }
-        html += `<h2>${trimmed.replace(':', '')}</h2>`;
-      } else if (/^[-*•]\s+/.test(trimmed) || /^\d+\.\s+/.test(trimmed)) {
-        if (!inList) {
-          html += '<ul>';
-          inList = true;
-        }
-        html += `<li>${trimmed.replace(/^[-*•\d.]+\s*/, '')}</li>`;
-      } else {
-        if (inList) {
-          html += '</ul>';
-          inList = false;
-        }
-        html += `<p>${trimmed}</p>`;
-      }
-    });
-
-    if (inList) {
-      html += '</ul>';
+      html += '<br />';
+      return;
     }
 
-    html += `
-      <h2>Signature</h2>
-      <p>__________________________</p>
-      <p>Name (Print)</p><br />
-      <p>__________________________</p>
-      <p>Signature</p><br />
-      <p>__________________________</p>
-      <p>Date</p>
-    `;
+    // Title
+    if (/^AI Use Policy for/i.test(trimmed)) {
+      html += `<h1>${trimmed}</h1>`;
+      return;
+    }
 
-    return html;
-  };
+    // Definitions section or list item
+    if (/^•|^-|^\*/.test(trimmed)) {
+      if (!inList) {
+        html += '<ul>';
+        inList = true;
+      }
+      html += `<li>${trimmed.replace(/^[-•*]\s*/, '')}</li>`;
+      return;
+    }
+
+    // Numbered section headers
+    const sectionHeaders = [
+      'Purpose', 'Scope', 'Industry Context', 'AI Tools Used',
+      'Tool Access Policy', 'Brand Guidelines', 'Who Can Use AI',
+      'Human Review Requirement', 'Fact/Quote Verification',
+      'Prohibited Use Areas', 'Policy Review Schedule',
+      'Image Disclaimers', 'Data Privacy and Member Protection',
+      'Responsible Innovation'
+    ];
+
+    if (sectionHeaders.some(h => trimmed.startsWith(h))) {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      html += `<h2>${sectionNumber++}. ${trimmed}</h2>`;
+      return;
+    }
+
+    // Definitions section
+    if (/^Definitions$/i.test(trimmed)) {
+      if (inList) {
+        html += '</ul>';
+        inList = false;
+      }
+      html += `<h2>${sectionNumber++}. ${trimmed}</h2>`;
+      return;
+    }
+
+    // Regular paragraph
+    if (inList) {
+      html += '</ul>';
+      inList = false;
+    }
+    html += `<p>${trimmed}</p>`;
+  });
+
+  if (inList) {
+    html += '</ul>';
+  }
+
+  // Add User Acknowledgement Section
+  html += `
+    <h2>User Acknowledgement & Signature</h2>
+    <p>By signing below, I acknowledge that I have read, understood, and agreed to follow the AI Use Policy outlined above.</p>
+    <p>Name: ___________________________</p>
+    <p>Title/Role: ___________________________</p>
+    <p>Signature: ___________________________</p>
+    <p>Date: ___________________________</p>
+  `;
+
+  return html;
+};
+
 
   const sendMessage = async () => {
     if (!input.trim()) return;
