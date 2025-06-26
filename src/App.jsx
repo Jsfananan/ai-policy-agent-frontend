@@ -37,6 +37,7 @@ function App() {
       .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
       .replace(/Thank you for creating your AI Use Policy with me!.*$/gi, '')
       .replace(/If you need further adjustments or have any questions, feel free to ask\./gi, '')
+      .replace(/Thank you for using the AI Policy Agent to create a responsible AI Use Policy\. If you need further assistance, feel free to reach out!/gi, '')
       .trim();
     
     // Split into lines and process
@@ -60,7 +61,8 @@ function App() {
       
       // Skip unwanted lines
       if (trimmedLine.toLowerCase().includes('generating your policy') || 
-          trimmedLine.toLowerCase().includes('thank you for creating')) {
+          trimmedLine.toLowerCase().includes('thank you for creating') ||
+          trimmedLine.toLowerCase().includes('thank you for using the ai policy agent')) {
         return;
       }
       
@@ -84,8 +86,8 @@ function App() {
       
       // Section headers - comprehensive list of all possible subtitles
       if (trimmedLine.startsWith('####') || 
-          /^\*\*(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|User Access|Image Disclaimers|Image Disclaimers|Statement|Policy Review|Human Review|Prohibited Use|Verification Statement|Review and Updates):\*\*$/i.test(trimmedLine) ||
-          /^(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|User Access|Image Disclaimers|Statement|Policy Review|Human Review|Prohibited Use|Verification Statement|Review and Updates):?\s*$/i.test(trimmedLine)) {
+          /^\*\*(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|User Access|Image Disclaimers|Statement|Policy Review|Human Review|Prohibited Use|Verification Statement|Review and Updates|User Guidelines):\*\*$/i.test(trimmedLine) ||
+          /^(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|User Access|Image Disclaimers|Statement|Policy Review|Human Review|Prohibited Use|Verification Statement|Review and Updates|User Guidelines):?\s*$/i.test(trimmedLine)) {
         if (inList) {
           formattedHtml += '</ul>';
           inList = false;
@@ -135,7 +137,9 @@ function App() {
             </p>
           </div>`;
       } else {
-        formattedHtml += `<p class="mb-4 leading-relaxed text-justify" style="color: black;">${trimmedLine}</p>`;
+        // Remove any remaining ** formatting from regular text
+        const cleanText = trimmedLine.replace(/\*\*(.*?)\*\*/g, '$1');
+        formattedHtml += `<p class="mb-4 leading-relaxed text-justify" style="color: black;">${cleanText}</p>`;
       }
     });
     
