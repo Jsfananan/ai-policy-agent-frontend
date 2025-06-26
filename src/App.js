@@ -27,7 +27,7 @@ export default function App() {
     setAnswers(newAnswers);
     if (step + 1 === QUESTIONS.length) {
       setLoading(true);
-      const res = await fetch('https://your-backend-url.repl.co/generate-policy', {
+      const res = await fetch('https://1d5a4792-f01f-494d-b1bb-d4b3ed55955a-00-2ta5705jlpzty.janeway.replit.dev/generate-policy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId: 'session-' + Date.now(), answers: Object.entries(newAnswers).map(([question, answer]) => ({ question, answer })) })
