@@ -26,99 +26,82 @@ function App() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
- const formatPolicyText = (text) => {
-  if (!text) return '';
+  const formatPolicyText = (text) => {
+    if (!text) return '';
 
-  // Remove unwanted lines
-  let cleanText = text
-    .replace(/Great! Generating your policy now\.\.\./gi, '')
-    .replace(/Thank you for (creating|taking the time to create).*AI Use Policy.*$/gi, '')
-    .replace(/If you need further adjustments.*$/gi, '')
-    .trim();
+    let cleanText = text
+      .replace(/Great! Generating your policy now\.{3}/gi, '')
+      .replace(/Thank you for (creating|taking the time to create).*AI Use Policy.*$/gi, '')
+      .replace(/If you need further adjustments.*$/gi, '')
+      .trim();
 
-  const lines = cleanText.split('\n');
-  let html = '';
-  let inList = false;
+    const lines = cleanText.split('\n');
+    let html = '';
+    let inList = false;
 
-  lines.forEach((line) => {
-    const trimmed = line.trim();
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        return;
+      }
 
-    // Skip empty lines
-    if (!trimmed) {
+      if (
+        trimmed.length < 60 &&
+        (trimmed.endsWith(':') ||
+          /^(Purpose|Scope|Definitions|Guidelines|Implementation|Review|Permitted Uses|Prohibited Uses|Policy Statement|Signature)$/i.test(trimmed))
+      ) {
+        html += `<p style="font-size:12pt; color:black;"><strong>${trimmed}</strong></p>`;
+        return;
+      }
+
+      if (/^[-•*]\s/.test(trimmed)) {
+        if (!inList) {
+          html += '<ul style="margin-left:1.5em; padding-left:0; margin-bottom:1em;">';
+          inList = true;
+        }
+        const item = trimmed.replace(/^[-•*]\s/, '');
+        html += `<li style="font-size:12pt; color:black;">• ${item}</li>`;
+        return;
+      }
+
       if (inList) {
         html += '</ul>';
         inList = false;
       }
-      return;
-    }
 
-    // Bold subtitles: short lines ending in colon or known header
-    if (
-      trimmed.length < 60 &&
-      (trimmed.endsWith(':') ||
-        /^(Purpose|Scope|Definitions|Guidelines|Implementation|Review|Permitted Uses|Prohibited Uses|Policy Statement|Signature)$/i.test(trimmed))
-    ) {
-      html += `<p style="font-size:12pt; color:black;"><strong>${trimmed}</strong></p>`;
-      return;
-    }
+      html += `<p style="font-size:12pt; color:black;">${trimmed}</p>`;
+    });
 
-    // List item
-    if (/^[-•*]\s/.test(trimmed)) {
-      if (!inList) {
-        html += '<ul style="margin-left:1.5em; padding-left:0; margin-bottom:1em;">';
-        inList = true;
-      }
-      const item = trimmed.replace(/^[-•*]\s/, '');
-      html += `<li style="font-size:12pt; color:black;">• ${item}</li>`;
-      return;
-    }
+    if (inList) html += '</ul>';
 
-    // Normal paragraph
-    if (inList) {
-      html += '</ul>';
-      inList = false;
-    }
-
-    html += `<p style="font-size:12pt; color:black;">${trimmed}</p>`;
-  });
-
-  if (inList) html += '</ul>';
-
-  // Add clean signature block
-  html += `
-    <div style="margin-top:2em;">
-      <p style="font-size:12pt; color:black;"><strong>Signature</strong></p>
-      <div style="margin-top:1.5em;">
-        <div style="border-bottom:1px solid black; height:2em;"></div>
-        <p style="font-size:12pt; color:black;">Name (Print)</p>
+    html += `
+      <div style="margin-top:2em;">
+        <p style="font-size:12pt; color:black;"><strong>Signature</strong></p>
+        <div style="margin-top:1.5em;">
+          <div style="border-bottom:1px solid black; height:2em;"></div>
+          <p style="font-size:12pt; color:black;">Name (Print)</p>
+        </div>
+        <div style="margin-top:1.5em;">
+          <div style="border-bottom:1px solid black; height:2em;"></div>
+          <p style="font-size:12pt; color:black;">Signature</p>
+        </div>
+        <div style="margin-top:1.5em;">
+          <div style="border-bottom:1px solid black; height:2em;"></div>
+          <p style="font-size:12pt; color:black;">Date</p>
+        </div>
       </div>
-      <div style="margin-top:1.5em;">
-        <div style="border-bottom:1px solid black; height:2em;"></div>
-        <p style="font-size:12pt; color:black;">Signature</p>
-      </div>
-      <div style="margin-top:1.5em;">
-        <div style="border-bottom:1px solid black; height:2em;"></div>
-        <p style="font-size:12pt; color:black;">Date</p>
-      </div>
-    </div>
-  `;
+    `;
 
-  return html;
-};
-
-
-  const getPlainTextPolicy = (text) => {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1')
-      .replace(/^#+\s*/gm, '')
-      .replace(/^\s*[-•*]\s*/gm, '• ')
-      .replace(/\n{2,}/g, '\n\n')
-      .replace(/\n\s+/g, '\n')
-      .trim();
+    return html;
   };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
     if (policyGenerated) {
       setMessages([...messages, { role: 'user', text: input }, { role: 'bot', text: '✅ This session is complete. Please copy your policy below.' }]);
       setInput('');
@@ -163,12 +146,12 @@ function App() {
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(getPlainTextPolicy(formattedPolicy));
+    navigator.clipboard.writeText(formattedPolicy);
     alert('✅ Policy copied to clipboard!');
   };
 
   return (
-    <div style={{ backgroundColor: colors.cardBackground }} className="min-h-screen p-6 font-sans" style={{ color: colors.olive }}>
+    <div style={{ backgroundColor: colors.cardBackground, color: colors.olive }} className="min-h-screen p-6 font-sans">
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
         <h1 className="text-2xl font-serif" style={{ color: colors.navy }}>AI Policy Agent</h1>
 
@@ -199,7 +182,6 @@ function App() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               className="border border-gray-300 p-3 rounded-lg flex-grow focus:outline-none focus:ring-2"
-              style={{ focusRingColor: colors.circuitryBlue }}
               placeholder="Type your answer..."
             />
             <button
@@ -238,46 +220,12 @@ function App() {
               >
                 📋 Copy to Clipboard
               </button>
-              <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{ backgroundColor: colors.navy }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = colors.candleGold;
-                  e.target.style.color = colors.navy;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = colors.navy;
-                  e.target.style.color = 'white';
-                }}
-                onClick={() => {
-                  setPolicyGenerated(false);
-                  setFormattedPolicy('');
-                  setMessages([messages[0]]);
-                }}
-              >
-                🔄 Create New Policy
-              </button>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-              <div className="text-white p-4" style={{ background: `linear-gradient(to right, ${colors.navy}, ${colors.circuitryBlue})` }}>
-                <h3 className="text-lg font-semibold flex items-center">
-                  <span className="mr-2">📄</span>
-                  Your Custom AI Use Policy
-                </h3>
+              <div className="p-8">
+                <div dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }} />
               </div>
-              <div className="p-8 bg-gradient-to-br from-white to-gray-50">
-                <div className="prose prose-lg max-w-none policy-document" dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }} />
-              </div>
-            </div>
-
-            <div className="mt-10 bg-gray-100 p-6 rounded-lg shadow-inner">
-              <h4 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                🧾 Plain Text Preview
-              </h4>
-              <pre className="whitespace-pre-wrap text-gray-800 text-sm leading-relaxed font-mono">
-                {getPlainTextPolicy(formattedPolicy)}
-              </pre>
             </div>
           </div>
         )}
@@ -287,4 +235,3 @@ function App() {
 }
 
 export default App;
-
