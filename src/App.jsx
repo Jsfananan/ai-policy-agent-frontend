@@ -35,6 +35,8 @@ export default function App() {
     let cleanText = text
       .replace(/Great! Generating your policy now\.\.\./gi, '')
       .replace(/Thank you for creating your AI Use Policy.*$/gi, '')
+      .replace(/Thank you for creating your AI Use Policy with me!.*$/gi, '')
+      .replace(/If you need further adjustments or have any questions, feel free to ask\./gi, '')
       .trim();
     
     // Split into lines and process
@@ -42,6 +44,8 @@ export default function App() {
     let formattedHtml = '';
     let inList = false;
     let sectionCount = 0;
+    let definitionsSection = '';
+    let captureDefinitions = false;
     
     lines.forEach((line, index) => {
       const trimmedLine = line.trim();
@@ -61,6 +65,62 @@ export default function App() {
         return;
       }
       
+      // Check if we're starting the definitions section
+      if (/^\*\*Definitions:\*\*$/i.test(trimmedLine) || /^Definitions:?\s*$/i.test(trimmedLine)) {
+        captureDefinitions = true;
+        definitionsSection += `
+          <div class="mt-8 mb-4">
+            <h2 class="text-2xl font-semibold pl-4 mb-3" style="color: ${colors.navy}; border-left: 4px solid ${colors.candleGold};">Definitions</h2>
+          </div>`;
+        return;
+      }
+      
+      // Check if we're hitting signature section - insert definitions before it
+      if (trimmedLine.toLowerCase().includes('signature') && trimmedLine.length < 30) {
+        captureDefinitions = false;
+        // Insert definitions before signature
+        if (definitionsSection) {
+          formattedHtml += definitionsSection;
+          definitionsSection = '';
+        }
+        
+        // Signature section
+        formattedHtml += `
+          <div class="mt-12 pt-8 border-t-2 border-gray-300">
+            <h3 class="text-lg font-medium mb-6" style="color: ${colors.navy};">${trimmedLine}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              <div>
+                <div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div>
+                <p class="text-sm text-gray-600">Employee Signature</p>
+              </div>
+              <div>
+                <div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div>
+                <p class="text-sm text-gray-600">Date</p>
+              </div>
+            </div>
+          </div>`;
+        return;
+      }
+      
+      // If we're capturing definitions, add to definitions section
+      if (captureDefinitions) {
+        // List items in definitions
+        if (/^[\s]*[-•*]\s/.test(trimmedLine) || /^[\s]*\d+\.\s/.test(trimmedLine)) {
+          if (!definitionsSection.includes('<ul')) {
+            definitionsSection += '<ul class="list-none mb-6 space-y-3 ml-4">';
+          }
+          const cleanItem = trimmedLine.replace(/^[\s]*[-•*]\s/, '').replace(/^[\s]*\d+\.\s/, '');
+          definitionsSection += `<li class="flex items-start"><span style="color: ${colors.candleGold};" class="mr-3 font-bold">•</span><span style="color: ${colors.olive};" class="leading-relaxed text-justify">${cleanItem}</span></li>`;
+        } else {
+          // Close list if we were in one
+          if (definitionsSection.includes('<ul') && !definitionsSection.includes('</ul>')) {
+            definitionsSection += '</ul>';
+          }
+          definitionsSection += `<p class="mb-4 leading-relaxed text-justify" style="color: ${colors.olive};">${trimmedLine}</p>`;
+        }
+        return;
+      }
+      
       // Main title - looks for "AI Use Policy for" or similar
       if (trimmedLine.toLowerCase().includes('ai use policy for') && 
           (trimmedLine.startsWith('####') || trimmedLine.startsWith('#') || sectionCount === 0)) {
@@ -74,14 +134,15 @@ export default function App() {
         return;
       }
       
-      // Section headers - look for #### format or specific section names
+      // Section headers - look for **Header:** format or #### format or specific section names
       if (trimmedLine.startsWith('####') || 
-          /^(Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring):?\s*$/i.test(trimmedLine)) {
+          /^\*\*(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|Image Disclaimers|Statement|Policy Review):\*\*$/i.test(trimmedLine) ||
+          /^(Purpose|Scope|Industry Context|AI Tools|Definitions|Guidelines|Implementation|Review|Signature|Policy Statement|Permitted Uses|Prohibited Uses|Training Requirements|Compliance|Monitoring|Brand Guidelines|User Authorization|Image Disclaimers|Statement|Policy Review):?\s*$/i.test(trimmedLine)) {
         if (inList) {
           formattedHtml += '</ul>';
           inList = false;
         }
-        const cleanHeader = trimmedLine.replace(/^#+\s*/, '').replace(/:$/, '');
+        const cleanHeader = trimmedLine.replace(/^#+\s*/, '').replace(/^\*\*/, '').replace(/\*\*$/, '').replace(/:$/, '');
         sectionCount++;
         formattedHtml += `
           <div class="mt-8 mb-4">
@@ -126,21 +187,8 @@ export default function App() {
             </p>
           </div>`;
       } else if (trimmedLine.toLowerCase().includes('signature') && trimmedLine.length < 30) {
-        // Signature section
-        formattedHtml += `
-          <div class="mt-12 pt-8 border-t-2 border-gray-300">
-            <h3 class="text-lg font-medium mb-6" style="color: ${colors.navy};">${trimmedLine}</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-              <div>
-                <div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div>
-                <p class="text-sm text-gray-600">Employee Signature</p>
-              </div>
-              <div>
-                <div class="border-b-2 border-gray-400 pb-1 mb-2 min-h-[40px]"></div>
-                <p class="text-sm text-gray-600">Date</p>
-              </div>
-            </div>
-          </div>`;
+        // This is handled above in the definitions section logic
+        return;
       } else {
         formattedHtml += `<p class="mb-4 leading-relaxed text-justify" style="color: ${colors.olive};">${trimmedLine}</p>`;
       }
@@ -149,6 +197,16 @@ export default function App() {
     // Close any remaining list
     if (inList) {
       formattedHtml += '</ul>';
+    }
+    
+    // Close definitions list if still open
+    if (definitionsSection.includes('<ul') && !definitionsSection.includes('</ul>')) {
+      definitionsSection += '</ul>';
+    }
+    
+    // If we still have definitions but no signature was found, append them at the end
+    if (definitionsSection && !formattedHtml.includes('Employee Signature')) {
+      formattedHtml += definitionsSection;
     }
     
     return formattedHtml;
