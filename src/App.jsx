@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function App() {
   const [messages, setMessages] = useState([
@@ -11,6 +11,11 @@ export default function App() {
   const [sessionId] = useState('session-' + Date.now());
   const [policyGenerated, setPolicyGenerated] = useState(false);
   const [formattedPolicy, setFormattedPolicy] = useState('');
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -63,7 +68,9 @@ export default function App() {
       const trimmed = line.trim();
       if (trimmed.startsWith('AI Use Policy for')) {
         return <h2 key={idx} className="text-2xl font-bold mt-6 mb-2">{trimmed}</h2>;
-      } else if (['Purpose','Scope','Why This Matters','Approved AI Tools','Who May Use AI','Required Human Review','Prohibited Use','Image Guidelines','Verification Responsibility','Policy Review','Agreement & Signature','Definitions'].some(title => trimmed === title)) {
+      } else if ([
+        'Purpose','Scope','Why This Matters','Approved AI Tools','Who May Use AI','Required Human Review','Prohibited Use','Image Guidelines','Verification Responsibility','Policy Review','Agreement & Signature','Definitions'
+      ].some(title => trimmed === title)) {
         return <h3 key={idx} className="text-lg font-semibold mt-4">{trimmed}</h3>;
       } else if (trimmed.includes('___________________________')) {
         return <p key={idx} className="mt-2 font-mono text-sm">{trimmed}</p>;
@@ -80,13 +87,19 @@ export default function App() {
 
         <div className="space-y-3">
           {messages.map((msg, i) => (
-            <div key={i} className={`flex items-start gap-2 ${msg.role === 'bot' ? 'bg-[#f9eae1]' : 'bg-circuitryBlue text-white'} p-3 rounded-xl w-fit max-w-[80%]`}>
-              {msg.role === 'bot' && (
-                <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
-              )}
-              <span className="whitespace-pre-line leading-relaxed">{msg.text}</span>
+            <div
+              key={i}
+              className={`flex ${msg.role === 'bot' ? 'justify-start' : 'justify-end'} w-full`}
+            >
+              <div className={`flex items-start gap-2 ${msg.role === 'bot' ? 'bg-[#f9eae1]' : 'bg-circuitryBlue text-white'} p-3 rounded-xl w-fit max-w-[80%]`}>
+                {msg.role === 'bot' && (
+                  <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
+                )}
+                <span className="whitespace-pre-line leading-relaxed">{msg.text}</span>
+              </div>
             </div>
           ))}
+          <div ref={bottomRef}></div>
         </div>
 
         {!policyGenerated && (
