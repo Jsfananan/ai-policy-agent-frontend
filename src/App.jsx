@@ -205,31 +205,30 @@ if (reply.includes('AI Use Policy for')) {
         </div>
 
         {!policyGenerated && (
-          <div className="flex items-center gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-              className="border border-gray-300 p-3 rounded-lg flex-grow focus:outline-none focus:ring-2"
-              style={{focusRingColor: colors.circuitryBlue}}
-              placeholder="Type your answer..."
-            />
-            <button
-              onClick={sendMessage}
-              className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:opacity-90"
-              style={{backgroundColor: colors.circuitryBlue}}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = colors.candleGold;
-                e.target.style.color = colors.navy;
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = colors.circuitryBlue;
-                e.target.style.color = 'white';
-              }}
-            >
-              Send
-            </button>
-          </div>
+<div className="flex w-full items-center gap-2 px-1">
+  <input
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+    placeholder="Type your answer..."
+    className="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none text-sm"
+  />
+  <button
+    onClick={sendMessage}
+    className="shrink-0 px-5 py-3 rounded-lg text-white text-sm font-medium transition-all duration-200"
+    style={{ backgroundColor: colors.circuitryBlue }}
+    onMouseEnter={(e) => {
+      e.target.style.backgroundColor = colors.candleGold;
+      e.target.style.color = colors.navy;
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.backgroundColor = colors.circuitryBlue;
+      e.target.style.color = 'white';
+    }}
+  >
+    Send
+  </button>
+</div>
         )}
 
         {policyGenerated && (
