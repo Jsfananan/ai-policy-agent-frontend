@@ -244,6 +244,26 @@ if (reply.includes('AI Use Policy for')) {
               >
                 📋 Copy to Clipboard
               </button>
+              <button
+  className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
+  style={{backgroundColor: colors.circuitryBlue}}
+  onMouseEnter={(e) => {
+    e.target.style.backgroundColor = colors.candleGold;
+    e.target.style.color = colors.navy;
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.backgroundColor = colors.circuitryBlue;
+    e.target.style.color = 'white';
+  }}
+  onClick={() => {
+    const subject = encodeURIComponent('Your Custom AI Use Policy');
+    const body = encodeURIComponent(formattedPolicy);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }}
+>
+  📧 Send to Email
+</button>
+
             
             </div>
             
