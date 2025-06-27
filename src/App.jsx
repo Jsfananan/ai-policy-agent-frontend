@@ -12,6 +12,8 @@ export default function App() {
   const [policyGenerated, setPolicyGenerated] = useState(false);
   const [formattedPolicy, setFormattedPolicy] = useState('');
   const bottomRef = useRef(null);
+  const hasInteracted = useRef(false);
+
 
   // Define your brand colors
   const colors = {
@@ -23,9 +25,11 @@ export default function App() {
     warmCream: '#f9eae1' // warm cream for bot messages
   };
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+useEffect(() => {
+  if (!hasInteracted.current) return; // skip scrolling on initial load
+  bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+}, [messages]);
+
 
   // Function to format the policy text into structured HTML
 const formatPolicyText = (text) => {
@@ -34,6 +38,8 @@ const formatPolicyText = (text) => {
 
 
   const sendMessage = async () => {
+    hasInteracted.current = true;
+
     if (!input.trim()) return;
 
     if (policyGenerated) {
