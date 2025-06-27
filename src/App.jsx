@@ -10,9 +10,10 @@ export default function App() {
   const [input, setInput] = useState('');
   const [sessionId] = useState('session-' + Date.now());
   const [policyGenerated, setPolicyGenerated] = useState(false);
-  const [formattedPolicy, setFormattedPolicy] = useState('');
-  const bottomRef = useRef(null);
-  const hasInteracted = useRef(false);
+const [formattedPolicy, setFormattedPolicy] = useState('');
+const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
+const bottomRef = useRef(null);
+const hasInteracted = useRef(false);
 
 
   // Define your brand colors
@@ -50,9 +51,10 @@ const formatPolicyText = (text) => {
       return;
     }
 
-    const newMessages = [...messages, { role: 'user', text: input }];
-    setMessages(newMessages);
-    setInput('');
+const newMessages = [...messages, { role: 'user', text: input }];
+setMessages(newMessages);
+setInput('');
+setIsLoading(true); // ADD THIS LINE
 
     try {
       const res = await fetch('https://ai-policy-agent.onrender.com/chat', {
@@ -77,11 +79,13 @@ if (reply.includes('AI Use Policy for')) {
 }
 
 
-      setMessages([...newMessages, { role: 'bot', text: reply }]);
-    } catch (err) {
-      console.error('Error:', err);
-      setMessages([...newMessages, { role: 'bot', text: '⚠️ Something went wrong. Please try again.' }]);
-    }
+setMessages([...newMessages, { role: 'bot', text: reply }]);
+} catch (err) {
+  console.error('Error:', err);
+  setMessages([...newMessages, { role: 'bot', text: '⚠️ Something went wrong. Please try again.' }]);
+} finally {
+  setIsLoading(false); // ADD THIS FINALLY BLOCK
+}
   };
 
   const handlePrint = () => {
@@ -177,9 +181,28 @@ if (reply.includes('AI Use Policy for')) {
     
     navigator.clipboard.writeText(cleanText);
     alert('✅ Policy copied to clipboard!');
-  };
+};
 
-  return (
+// Loading dots component
+const LoadingDots = () => (
+  <div className={`flex items-start gap-2 p-3 rounded-xl w-fit max-w-[80%]`}
+       style={{
+         backgroundColor: colors.warmCream,
+         color: colors.olive
+       }}>
+    <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
+    <div className="flex items-center space-x-1 py-2">
+      <div className="flex space-x-1">
+        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+      </div>
+      <span className="text-sm text-gray-500 ml-2">AI is thinking...</span>
+    </div>
+  </div>
+);
+
+return (
     <div style={{backgroundColor: colors.cardBackground}} className="min-h-screen p-6 font-sans" 
          style={{color: colors.olive}}>
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
@@ -202,34 +225,42 @@ if (reply.includes('AI Use Policy for')) {
                 <span className="whitespace-pre-line leading-relaxed">{msg.text}</span>
               </div>
             </div>
-          ))}
-          <div ref={bottomRef}></div>
-        </div>
+))}
+{isLoading && <LoadingDots />}
+<div ref={bottomRef}></div>
+</div>
 
         {!policyGenerated && (
 <div className="flex w-full items-center gap-2 px-1">
-  <input
-    value={input}
-    onChange={(e) => setInput(e.target.value)}
-    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-    placeholder="Type your answer..."
-    className="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none text-sm"
-  />
-  <button
-    onClick={sendMessage}
-    className="shrink-0 px-5 py-3 rounded-lg text-white text-sm font-medium transition-all duration-200"
-    style={{ backgroundColor: colors.circuitryBlue }}
-    onMouseEnter={(e) => {
+<input
+  value={input}
+  onChange={(e) => setInput(e.target.value)}
+  onKeyDown={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
+  placeholder="Type your answer..."
+  disabled={isLoading}
+  className="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none text-sm"
+  style={{fontSize: '16px'}}
+/>
+<button
+  onClick={sendMessage}
+  disabled={isLoading}
+  className="shrink-0 px-5 py-3 rounded-lg text-white text-sm font-medium transition-all duration-200 disabled:opacity-50"
+  style={{ backgroundColor: isLoading ? '#9ca3af' : colors.circuitryBlue }}
+  onMouseEnter={(e) => {
+    if (!isLoading) {
       e.target.style.backgroundColor = colors.candleGold;
       e.target.style.color = colors.navy;
-    }}
-    onMouseLeave={(e) => {
+    }
+  }}
+  onMouseLeave={(e) => {
+    if (!isLoading) {
       e.target.style.backgroundColor = colors.circuitryBlue;
       e.target.style.color = 'white';
-    }}
-  >
-    Send
-  </button>
+    }
+  }}
+>
+  {isLoading ? '...' : 'Send'}
+</button>
 </div>
         )}
 
