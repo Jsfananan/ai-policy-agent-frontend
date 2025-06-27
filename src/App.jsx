@@ -27,7 +27,9 @@ export default function App() {
 
 useEffect(() => {
   if (!hasInteracted.current) return; // skip scrolling on initial load
-  bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  setTimeout(() => {
+  bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}, 100);
 }, [messages]);
 
 
@@ -183,7 +185,7 @@ if (reply.includes('AI Use Policy for')) {
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
         <h1 className="text-2xl font-serif" style={{color: colors.navy}}>AI Policy Agent</h1>
         
-        <div className="space-y-3">
+        <div className="flex flex-col space-y-3 overflow-auto max-h-[60vh] min-h-[40vh] pr-1">
           {messages.map((msg, i) => (
             <div
               key={i}
