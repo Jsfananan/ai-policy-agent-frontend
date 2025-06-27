@@ -4,7 +4,7 @@ export default function App() {
   const [messages, setMessages] = useState([
     {
       role: 'bot',
-      text: "Hi there! I'm your AI Policy Agent—here to help you create a clear, customized AI Use Policy.\n\nWith the rise of tools like ChatGPT and Midjourney, it's more important than ever to set healthy boundaries and expectations.\n\nLet's get started—what's the name of the organization or individual this policy is for?"
+      text: "Hi there! I'm here to help you create a customized AI Use Policy.\n\nLet's get started—what's the name of the organization or individual this policy is for?"
     }
   ]);
   const [input, setInput] = useState('');
