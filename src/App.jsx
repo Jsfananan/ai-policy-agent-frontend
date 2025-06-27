@@ -47,7 +47,7 @@ const formatPolicyText = (text) => {
     setInput('');
 
     try {
-      const res = await fetch('https://b0171f93-2067-4348-814a-806bd385a885-00-pe0wbytc9iis.riker.replit.dev/chat', {
+      const res = await fetch('https://ai-policy-agent.onrender.com/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
