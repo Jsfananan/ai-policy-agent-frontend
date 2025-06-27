@@ -30,7 +30,7 @@ const hasInteracted = useRef(false);
 
   // Define your brand colors
   const colors = {
-    cardBackground: '#f5f5dc', // beige/cream background
+    cardBackground: '#F2D6CB', // beige/cream background
     olive: '#6b7280', // olive text color
     navy: '#1e3a8a', // navy blue for headers
     circuitryBlue: '#3b82f6', // blue for buttons/accents
