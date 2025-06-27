@@ -219,13 +219,12 @@ return (
   backgroundColor: colors.cardBackground,
   color: colors.olive,
   height: '100vh',
-  maxHeight: '100vh',
-  overflow: 'hidden'
-}} className="p-6 font-sans">
-      <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
+  padding: '12px'
+}} className="font-sans flex flex-col">
+<div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-4 flex flex-col h-full">
         <h1 className="text-2xl font-serif" style={{color: colors.navy}}>AI Policy Agent</h1>
         
-        <div className="flex flex-col space-y-3 overflow-auto max-h-[60vh] min-h-[40vh] pr-1">
+<div className="flex flex-col space-y-3 overflow-auto flex-1 pr-1 mb-4">
           {messages.map((msg, i) => (
             <div
               key={i}
