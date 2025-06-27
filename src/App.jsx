@@ -14,6 +14,18 @@ const [formattedPolicy, setFormattedPolicy] = useState('');
 const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
 const bottomRef = useRef(null);
 const hasInteracted = useRef(false);
+  useEffect(() => {
+  // Scroll to top when component mounts
+  window.scrollTo(0, 0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+  
+  // Set body styles to eliminate blank space
+  document.body.style.margin = '0';
+  document.body.style.padding = '0';
+  document.body.style.height = '100vh';
+  document.body.style.overflow = 'hidden';
+}, []);
 
 
   // Define your brand colors
@@ -203,8 +215,13 @@ const LoadingDots = () => (
 );
 
 return (
-    <div style={{backgroundColor: colors.cardBackground}} className="min-h-screen p-6 font-sans" 
-         style={{color: colors.olive}}>
+<div style={{
+  backgroundColor: colors.cardBackground,
+  color: colors.olive,
+  height: '100vh',
+  maxHeight: '100vh',
+  overflow: 'hidden'
+}} className="p-6 font-sans">
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-6 space-y-4">
         <h1 className="text-2xl font-serif" style={{color: colors.navy}}>AI Policy Agent</h1>
         
