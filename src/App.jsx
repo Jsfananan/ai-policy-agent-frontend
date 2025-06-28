@@ -13,8 +13,9 @@ export default function App() {
 const [formattedPolicy, setFormattedPolicy] = useState('');
 const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
 const bottomRef = useRef(null);
+  const inputRef = useRef(null); // Add this line
 const hasInteracted = useRef(false);
-  useEffect(() => {
+useEffect(() => {
   // Scroll to top when component mounts
   window.scrollTo(0, 0);
   document.body.scrollTop = 0;
@@ -25,6 +26,13 @@ const hasInteracted = useRef(false);
   document.body.style.padding = '0';
   document.body.style.height = '100vh';
   document.body.style.overflow = 'hidden';
+  
+  // Warm up the server on component mount
+  fetch('https://ai-policy-agent.onrender.com/warmup', {
+    method: 'GET'
+  }).catch(() => {
+    // Ignore errors, this is just to wake up the server
+  });
 }, []);
 
 
@@ -41,16 +49,20 @@ const hasInteracted = useRef(false);
 useEffect(() => {
   if (!hasInteracted.current) return; // skip scrolling on initial load
   setTimeout(() => {
-  bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-}, 100);
-}, [messages]);
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    // Auto-focus input after bot response
+    if (messages[messages.length - 1]?.role === 'bot' && !policyGenerated && !isLoading) {
+      inputRef.current?.focus();
+    }
+  }, 100);
+}, [messages, policyGenerated, isLoading]);
 
 
   // Function to format the policy text into structured HTML
 const formatPolicyText = (text) => {
   let formattedText = text.trim();
   
-  // Convert markdown-style formatting to HTML
+  // Convert markdown-style headers
   formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   formattedText = formattedText.replace(/^\*\*(.*?)\*\*$/gm, '<h2>$1</h2>');
   
@@ -58,16 +70,36 @@ const formatPolicyText = (text) => {
   formattedText = formattedText.replace(/^- (.*$)/gm, '<li>$1</li>');
   formattedText = formattedText.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
   
-  // Add proper line breaks and paragraphs
-  formattedText = formattedText.replace(/\n\n/g, '</p><p>');
+  // Add proper spacing between sections
+  formattedText = formattedText.replace(/\n\n/g, '</p><div class="section-break"></div><p>');
+  
+  // Handle signature section specially
+  formattedText = formattedText.replace(
+    /Signature Section:(.*?)$/gms, 
+    '<div class="signature-section"><h3>Signature Section:</h3>$1</div>'
+  );
+  
+  // Format signature fields on separate lines
+  formattedText = formattedText.replace(
+    /Name:\s*_+\s*Title\/Role:\s*_+\s*Signature:\s*_+\s*Date:\s*_+/g,
+    '<div class="signature-fields">' +
+    '<div class="signature-line">Name: ________________________</div>' +
+    '<div class="signature-line">Title/Role: ________________________</div>' +
+    '<div class="signature-line">Signature: ________________________</div>' +
+    '<div class="signature-line">Date: ________________________</div>' +
+    '</div>'
+  );
+  
   formattedText = '<p>' + formattedText + '</p>';
   
-  // Clean up empty paragraphs
+  // Clean up
   formattedText = formattedText.replace(/<p><\/p>/g, '');
   formattedText = formattedText.replace(/<p><h2>/g, '<h2>');
   formattedText = formattedText.replace(/<\/h2><\/p>/g, '</h2>');
   formattedText = formattedText.replace(/<p><ul>/g, '<ul>');
   formattedText = formattedText.replace(/<\/ul><\/p>/g, '</ul>');
+  formattedText = formattedText.replace(/<p><div class="signature-section">/g, '<div class="signature-section">');
+  formattedText = formattedText.replace(/<\/div><\/p>/g, '</div>');
   
   return `<div class="policy-content font-sans text-gray-800 text-base leading-relaxed">${formattedText}</div>`;
 };
@@ -369,6 +401,7 @@ style={{
         {!policyGenerated && (
 <div className="flex w-full items-center gap-3 px-1 pt-4 border-t border-gray-100">
 <input
+  ref={inputRef} // Add this line
   value={input}
   onChange={(e) => setInput(e.target.value)}
   onKeyDown={(e) => {
