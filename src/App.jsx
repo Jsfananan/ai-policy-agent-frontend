@@ -74,21 +74,21 @@ const formatPolicyText = (text) => {
   formattedText = formattedText.replace(/\n\n/g, '</p><div class="section-break"></div><p>');
   
   // Handle signature section specially
-formattedText = formattedText.replace(
-  /Signature Section:([\s\S]*?)$/gm, 
-  '<div class="signature-section"><h3>Signature Section:</h3>$1</div>'
-);
-
-// Format signature fields on separate lines
-formattedText = formattedText.replace(
-  /Name:\s*_+\s*Title[\/\\]Role:\s*_+\s*Signature:\s*_+\s*Date:\s*_+/g,
-  '<div class="signature-fields">' +
-  '<div class="signature-line">Name: ________________________</div>' +
-  '<div class="signature-line">Title/Role: ________________________</div>' +
-  '<div class="signature-line">Signature: ________________________</div>' +
-  '<div class="signature-line">Date: ________________________</div>' +
-  '</div>'
-);
+  formattedText = formattedText.replace(
+    /Signature Section:(.*?)$/gms, 
+    '<div class="signature-section"><h3>Signature Section:</h3>$1</div>'
+  );
+  
+  // Format signature fields on separate lines
+  formattedText = formattedText.replace(
+    /Name:\s*_+\s*Title\/Role:\s*_+\s*Signature:\s*_+\s*Date:\s*_+/g,
+    '<div class="signature-fields">' +
+    '<div class="signature-line">Name: ________________________</div>' +
+    '<div class="signature-line">Title/Role: ________________________</div>' +
+    '<div class="signature-line">Signature: ________________________</div>' +
+    '<div class="signature-line">Date: ________________________</div>' +
+    '</div>'
+  );
   
   formattedText = '<p>' + formattedText + '</p>';
   
@@ -504,22 +504,7 @@ className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transi
       Your Custom AI Use Policy
     </h3>
   </div>
-<div className="p-4 sm:p-8 bg-gradient-to-br from-white to-gray-50 max-h-96 overflow-y-auto">
-  <div 
-    className="policy-document text-sm sm:text-base"
-    style={{
-      maxWidth: '100%',
-      wordWrap: 'break-word',
-      overflowWrap: 'break-word'
-    }}
-    dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
-  />
-  <style>{`
-    .policy-content h2 { margin: 20px 0 10px 0; }
-    .policy-content p { margin: 12px 0; }
-    .policy-content .section-break { height: 20px; }
-  `}</style>
-</div>
+  <div className="p-4 sm:p-8 bg-gradient-to-br from-white to-gray-50 max-h-96 overflow-y-auto">
     <div 
       className="policy-document text-sm sm:text-base"
       style={{
