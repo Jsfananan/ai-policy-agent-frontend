@@ -48,14 +48,38 @@ useEffect(() => {
 
   // Function to format the policy text into structured HTML
 const formatPolicyText = (text) => {
-  return `<pre class="whitespace-pre-wrap font-sans text-gray-800 text-base leading-relaxed">${text.trim()}</pre>`;
+  let formattedText = text.trim();
+  
+  // Convert markdown-style formatting to HTML
+  formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  formattedText = formattedText.replace(/^\*\*(.*?)\*\*$/gm, '<h2>$1</h2>');
+  
+  // Convert bullet points
+  formattedText = formattedText.replace(/^- (.*$)/gm, '<li>$1</li>');
+  formattedText = formattedText.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
+  
+  // Add proper line breaks and paragraphs
+  formattedText = formattedText.replace(/\n\n/g, '</p><p>');
+  formattedText = '<p>' + formattedText + '</p>';
+  
+  // Clean up empty paragraphs
+  formattedText = formattedText.replace(/<p><\/p>/g, '');
+  formattedText = formattedText.replace(/<p><h2>/g, '<h2>');
+  formattedText = formattedText.replace(/<\/h2><\/p>/g, '</h2>');
+  formattedText = formattedText.replace(/<p><ul>/g, '<ul>');
+  formattedText = formattedText.replace(/<\/ul><\/p>/g, '</ul>');
+  
+  return `<div class="policy-content font-sans text-gray-800 text-base leading-relaxed">${formattedText}</div>`;
 };
 
 
-  const sendMessage = async () => {
-    hasInteracted.current = true;
+const sendMessage = async () => {
+  hasInteracted.current = true;
 
-    if (!input.trim()) return;
+  if (!input.trim()) {
+    alert('⚠️ Please enter a response before continuing.');
+    return;
+  }
 
     if (policyGenerated) {
       setMessages([...messages, { role: 'user', text: input }, { role: 'bot', text: '✅ This session is complete. Please copy your policy below.' }]);
@@ -86,15 +110,34 @@ setIsLoading(true); // ADD THIS LINE
 
 if (reply.includes('AI Use Policy for')) {
   setPolicyGenerated(true);
-  setFormattedPolicy(reply.trim());
-  reply = '✅ Policy generated below — Brought to you by [Leadership in Change](https://leadershipinchange10.substack.com)';
+  // Clean the policy text by removing unwanted parts
+  let cleanedPolicy = reply.trim();
+  
+  // Remove "Great! Generating your policy now..." and similar text
+  cleanedPolicy = cleanedPolicy.replace(/Great[!]?\s*Generating your policy now[.\s]*/gi, '');
+  cleanedPolicy = cleanedPolicy.replace(/---[\s\n]*/g, '');
+  
+  // Remove any thank you messages at the end
+  cleanedPolicy = cleanedPolicy.replace(/\n*.*thank you.*creating.*$/gi, '');
+  cleanedPolicy = cleanedPolicy.replace(/\n*.*brought to you by.*$/gi, '');
+  
+  setFormattedPolicy(cleanedPolicy.trim());
+  reply = '✅ Policy generated below';
 }
 
 
 setMessages([...newMessages, { role: 'bot', text: reply }]);
 } catch (err) {
   console.error('Error:', err);
-  setMessages([...newMessages, { role: 'bot', text: '⚠️ Something went wrong. Please try again.' }]);
+  let errorMessage = '⚠️ Connection error. Please check your internet and try again.';
+  
+  if (err.message.includes('fetch')) {
+    errorMessage = '⚠️ Unable to connect to our servers. Please try again in a moment.';
+  } else if (err.message.includes('timeout')) {
+    errorMessage = '⚠️ Request timed out. Please try again.';
+  }
+  
+  setMessages([...newMessages, { role: 'bot', text: errorMessage }]);
 } finally {
   setIsLoading(false); // ADD THIS FINALLY BLOCK
 }
@@ -173,7 +216,120 @@ setMessages([...newMessages, { role: 'bot', text: reply }]);
               h1 { font-size: 24px; }
               h2 { font-size: 18px; }
               .no-print { display: none; }
-            }
+            }printWindow.document.write(`
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <title>AI Use Policy</title>
+      <style>
+        body { 
+          font-family: 'Georgia', 'Times New Roman', serif; 
+          line-height: 1.8; 
+          max-width: 800px; 
+          margin: 0 auto; 
+          padding: 40px 20px;
+          color: #2c3e50;
+          background: white;
+        }
+        h1 { 
+          color: #1a365d; 
+          text-align: center;
+          font-size: 28px;
+          margin-bottom: 30px;
+          padding-bottom: 15px;
+          border-bottom: 3px solid #d69e2e;
+        }
+        h2 { 
+          color: #1a365d; 
+          font-size: 20px;
+          margin-top: 35px;
+          margin-bottom: 15px;
+          padding-left: 15px;
+          border-left: 4px solid #d69e2e;
+        }
+        h3 {
+          color: #1a365d;
+          font-size: 16px;
+          margin-top: 20px;
+          margin-bottom: 10px;
+        }
+        ul { 
+          margin: 20px 0;
+          padding-left: 0;
+        }
+        li { 
+          margin: 12px 0;
+          padding-left: 20px;
+          list-style: none;
+          position: relative;
+        }
+        li:before {
+          content: "•";
+          color: #d69e2e;
+          font-weight: bold;
+          position: absolute;
+          left: 0;
+        }
+        p { 
+          text-align: justify;
+          margin-bottom: 15px;
+          color: #4a5568;
+        }
+
+        /* ADD THESE NEW STYLES HERE: */
+        .policy-content {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+
+        .policy-content h2 {
+          color: #1a365d;
+          font-size: 18px;
+          font-weight: bold;
+          margin: 20px 0 10px 0;
+          padding: 0;
+          border: none;
+        }
+
+        .policy-content ul {
+          margin: 15px 0;
+          padding-left: 20px;
+        }
+
+        .policy-content li {
+          margin: 8px 0;
+          list-style-type: disc;
+        }
+
+        .policy-content p {
+          margin: 12px 0;
+          line-height: 1.6;
+        }
+
+        @media (max-width: 640px) {
+          .policy-content {
+            font-size: 14px;
+            line-height: 1.5;
+          }
+          
+          .policy-content h2 {
+            font-size: 16px;
+          }
+        }
+        /* END OF NEW STYLES */
+     
+        @media print {
+          body { 
+            padding: 20px; 
+            font-size: 12px;
+          }
+          h1 { font-size: 24px; }
+          h2 { font-size: 18px; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
           </style>
         </head>
         <body>
@@ -185,14 +341,47 @@ setMessages([...newMessages, { role: 'bot', text: reply }]);
     printWindow.print();
   };
 
-  const copyToClipboard = () => {
-    // Create a clean text version for clipboard
+ const copyToClipboard = async () => {
+  try {
     const cleanText = formattedPolicy
-      .replace(/\n\s*\n/g, '\n\n') // Normalize line breaks
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/\n\s*\n/g, '\n\n')
       .trim();
     
-    navigator.clipboard.writeText(cleanText);
+    await navigator.clipboard.writeText(cleanText);
+    
+    // Show better success feedback
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '✅ Copied!';
+    button.style.backgroundColor = colors.success;
+    
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.style.backgroundColor = colors.circuitryBlue;
+    }, 2000);
+    
+  } catch (err) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = formattedPolicy.replace(/<[^>]*>/g, '');
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
     alert('✅ Policy copied to clipboard!');
+  }
+};
+
+const downloadAsWord = () => {
+  const cleanText = formattedPolicy.replace(/<[^>]*>/g, '').trim();
+  const blob = new Blob([cleanText], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'AI_Use_Policy.doc';
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 // Loading dots component
@@ -221,7 +410,7 @@ return (
   height: '100vh',
   padding: '12px'
 }} className="font-sans flex flex-col">
-<div className="max-w-4xl mx-auto bg-white shadow-lg rounded-3xl p-8 flex flex-col h-full">
+<div className="max-w-4xl mx-auto bg-white shadow-lg rounded-3xl p-4 sm:p-8 flex flex-col h-full overflow-hidden">
 <div className="text-center mb-6 pb-4 border-b border-gray-200">
   <h1 className="text-2xl font-bold text-gray-800 mb-1">AI Policy Generator</h1>
   <p className="text-sm text-gray-500">Create professional AI use policies in minutes</p>
@@ -255,11 +444,20 @@ style={{
 <input
   value={input}
   onChange={(e) => setInput(e.target.value)}
-  onKeyDown={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
-  placeholder="Type your answer..."
+  onKeyDown={(e) => {
+    if (e.key === 'Enter' && !isLoading && input.trim()) {
+      sendMessage();
+    }
+  }}
+  placeholder="Type your answer here..."
   disabled={isLoading}
-className="flex-grow px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm shadow-sm"
-  style={{fontSize: '16px'}}
+  autoComplete="off"
+  autoCapitalize="sentences"
+  className="flex-grow px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm transition-all duration-200"
+  style={{
+    fontSize: '16px',
+    backgroundColor: isLoading ? '#f9fafb' : 'white'
+  }}
 />
 <button
   onClick={sendMessage}
@@ -307,21 +505,26 @@ className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transi
             
             </div>
             
-            <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-              <div className="text-white p-4" 
-                   style={{background: `linear-gradient(to right, ${colors.navy}, ${colors.circuitryBlue})`}}>
-                <h3 className="text-lg font-semibold flex items-center">
-                  <span className="mr-2">📄</span>
-                  Your Custom AI Use Policy
-                </h3>
-              </div>
-              <div className="p-8 bg-gradient-to-br from-white to-gray-50">
-                <div 
-                  className="prose prose-lg max-w-none policy-document"
-                  dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
-                />
-              </div>
-            </div>
+           <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
+  <div className="text-white p-4" 
+       style={{background: `linear-gradient(to right, ${colors.navy}, ${colors.circuitryBlue})`}}>
+    <h3 className="text-lg font-semibold flex items-center">
+      <span className="mr-2">📄</span>
+      Your Custom AI Use Policy
+    </h3>
+  </div>
+  <div className="p-4 sm:p-8 bg-gradient-to-br from-white to-gray-50 max-h-96 overflow-y-auto">
+    <div 
+      className="policy-document text-sm sm:text-base"
+      style={{
+        maxWidth: '100%',
+        wordWrap: 'break-word',
+        overflowWrap: 'break-word'
+      }}
+      dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
+    />
+  </div>
+</div>
           </div>
         )}
       </div>
