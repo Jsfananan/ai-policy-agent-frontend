@@ -35,7 +35,7 @@ const hasInteracted = useRef(false);
     navy: '#1e3a8a', // navy blue for headers
     circuitryBlue: '#3b82f6', // blue for buttons/accents
     candleGold: '#f59e0b', // gold for highlights
-    warmCream: '#f9eae1' // warm cream for bot messages
+    warmCream: '#ffffff' // warm cream for bot messages
   };
 
 useEffect(() => {
@@ -221,8 +221,11 @@ return (
   height: '100vh',
   padding: '12px'
 }} className="font-sans flex flex-col">
-<div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-4 flex flex-col h-full">
-        <h1 className="text-2xl font-serif" style={{color: colors.navy}}>AI Policy Agent</h1>
+<div className="max-w-4xl mx-auto bg-white shadow-lg rounded-3xl p-8 flex flex-col h-full">
+<div className="text-center mb-6 pb-4 border-b border-gray-200">
+  <h1 className="text-2xl font-bold text-gray-800 mb-1">AI Policy Generator</h1>
+  <p className="text-sm text-gray-500">Create professional AI use policies in minutes</p>
+</div>
         
 <div className="flex flex-col space-y-3 overflow-auto flex-1 pr-1 mb-4">
           {messages.map((msg, i) => (
@@ -231,10 +234,11 @@ return (
               className={`flex ${msg.role === 'bot' ? 'justify-start' : 'justify-end'} w-full`}
             >
               <div className={`flex items-start gap-2 p-3 rounded-xl w-fit max-w-[80%]`}
-                   style={{
-                     backgroundColor: msg.role === 'bot' ? colors.warmCream : colors.circuitryBlue,
-                     color: msg.role === 'bot' ? colors.olive : 'white'
-                   }}>
+style={{
+  backgroundColor: msg.role === 'bot' ? colors.warmCream : colors.circuitryBlue,
+  color: msg.role === 'bot' ? colors.olive : 'white',
+  border: msg.role === 'bot' ? '1px solid #e5e7eb' : 'none'
+}}>
                 {msg.role === 'bot' && (
                   <img src="/bot-icon.png" alt="AI Agent" className="w-8 h-8 rounded-full shadow-md mt-1" />
                 )}
@@ -247,20 +251,20 @@ return (
 </div>
 
         {!policyGenerated && (
-<div className="flex w-full items-center gap-2 px-1">
+<div className="flex w-full items-center gap-3 px-1 pt-4 border-t border-gray-100">
 <input
   value={input}
   onChange={(e) => setInput(e.target.value)}
   onKeyDown={(e) => e.key === 'Enter' && !isLoading && sendMessage()}
   placeholder="Type your answer..."
   disabled={isLoading}
-  className="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:outline-none text-sm"
+className="flex-grow px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm shadow-sm"
   style={{fontSize: '16px'}}
 />
 <button
   onClick={sendMessage}
   disabled={isLoading}
-  className="shrink-0 px-5 py-3 rounded-lg text-white text-sm font-medium transition-all duration-200 disabled:opacity-50"
+className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50 shadow-sm"
   style={{ backgroundColor: isLoading ? '#9ca3af' : colors.circuitryBlue }}
   onMouseEnter={(e) => {
     if (!isLoading) {
