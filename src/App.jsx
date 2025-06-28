@@ -185,6 +185,37 @@ const handlePrint = () => {
       <head>
         <title>AI Use Policy</title>
         <style>
+        .section-break {
+  height: 20px;
+}
+
+.signature-section {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.signature-section h3 {
+  color: #1a365d;
+  font-size: 18px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #d69e2e;
+  padding-bottom: 8px;
+}
+
+.signature-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.signature-line {
+  font-size: 14px;
+  color: #4a5568;
+  padding: 8px 0;
+}
           body { 
             font-family: 'Georgia', 'Times New Roman', serif; 
             line-height: 1.8; 
