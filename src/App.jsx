@@ -74,21 +74,21 @@ const formatPolicyText = (text) => {
   formattedText = formattedText.replace(/\n\n/g, '</p><div class="section-break"></div><p>');
   
   // Handle signature section specially
-  formattedText = formattedText.replace(
-    /Signature Section:(.*?)$/gms, 
-    '<div class="signature-section"><h3>Signature Section:</h3>$1</div>'
-  );
-  
-  // Format signature fields on separate lines
-  formattedText = formattedText.replace(
-    /Name:\s*_+\s*Title\/Role:\s*_+\s*Signature:\s*_+\s*Date:\s*_+/g,
-    '<div class="signature-fields">' +
-    '<div class="signature-line">Name: ________________________</div>' +
-    '<div class="signature-line">Title/Role: ________________________</div>' +
-    '<div class="signature-line">Signature: ________________________</div>' +
-    '<div class="signature-line">Date: ________________________</div>' +
-    '</div>'
-  );
+formattedText = formattedText.replace(
+  /Signature Section:([\s\S]*?)$/gm, 
+  '<div class="signature-section"><h3>Signature Section:</h3>$1</div>'
+);
+
+// Format signature fields on separate lines
+formattedText = formattedText.replace(
+  /Name:\s*_+\s*Title[\/\\]Role:\s*_+\s*Signature:\s*_+\s*Date:\s*_+/g,
+  '<div class="signature-fields">' +
+  '<div class="signature-line">Name: ________________________</div>' +
+  '<div class="signature-line">Title/Role: ________________________</div>' +
+  '<div class="signature-line">Signature: ________________________</div>' +
+  '<div class="signature-line">Date: ________________________</div>' +
+  '</div>'
+);
   
   formattedText = '<p>' + formattedText + '</p>';
   
