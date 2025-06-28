@@ -504,7 +504,76 @@ className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transi
       Your Custom AI Use Policy
     </h3>
   </div>
-  <div className="p-4 sm:p-8 bg-gradient-to-br from-white to-gray-50 max-h-96 overflow-y-auto">
+<div className="p-4 sm:p-8 bg-gradient-to-br from-white to-gray-50 max-h-96 overflow-y-auto">
+  <style>
+    {`
+      .policy-content .section-break {
+        height: 20px;
+      }
+      
+      .policy-content h2 {
+        color: #1a365d !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        margin: 20px 0 10px 0 !important;
+        padding: 0 !important;
+        border: none !important;
+      }
+      
+      .policy-content p {
+        margin: 12px 0 !important;
+        line-height: 1.6 !important;
+      }
+      
+      .policy-content ul {
+        margin: 15px 0 !important;
+        padding-left: 20px !important;
+      }
+      
+      .policy-content li {
+        margin: 8px 0 !important;
+        list-style-type: disc !important;
+      }
+      
+      .policy-content .signature-section {
+        margin-top: 30px !important;
+        padding: 20px !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        background-color: #f9fafb !important;
+      }
+      
+      .policy-content .signature-section h3 {
+        color: #1a365d !important;
+        font-size: 18px !important;
+        margin-bottom: 15px !important;
+        border-bottom: 2px solid #d69e2e !important;
+        padding-bottom: 8px !important;
+      }
+      
+      .policy-content .signature-fields {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+      }
+      
+      .policy-content .signature-line {
+        font-size: 14px !important;
+        color: #4a5568 !important;
+        padding: 8px 0 !important;
+      }
+    `}
+  </style>
+  <div 
+    className="policy-document text-sm sm:text-base"
+    style={{
+      maxWidth: '100%',
+      wordWrap: 'break-word',
+      overflowWrap: 'break-word'
+    }}
+    dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
+  />
+</div>
     <div 
       className="policy-document text-sm sm:text-base"
       style={{
