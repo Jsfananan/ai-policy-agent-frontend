@@ -20,6 +20,8 @@ export default function App() {
   const [policyGenerated, setPolicyGenerated] = useState(false);
 const [formattedPolicy, setFormattedPolicy] = useState('');
 const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
+  const [questionCount, setQuestionCount] = useState(0);
+const [estimatedQuestions] = useState(9);
   // ADD these handlers right after your state declarations and before useEffect
 const handleKeyDown = useCallback((e) => {
   if (e.key === 'Enter' && !isLoading && input.trim()) {
@@ -174,6 +176,9 @@ const formatPolicyText = (text) => {
 
 const sendMessage = async () => {
   hasInteracted.current = true;
+  if (!policyGenerated) {
+  setQuestionCount(prev => prev + 1);
+}
 
   if (!input.trim()) {
     alert('⚠️ Please enter a response before continuing.');
@@ -455,7 +460,28 @@ const LoadingDots = () => (
     </div>
   </div>
 );
+// ADD THIS RIGHT BEFORE YOUR return ( STATEMENT
+const ProgressIndicator = () => {
+  const progress = Math.min((questionCount / estimatedQuestions) * 100, 95);
+  
+  return (
+    <div className="w-full mb-4">
+      <div className="flex justify-between text-xs text-gray-500 mb-1">
+        <span>Building your policy...</span>
+        <span>{Math.round(progress)}% complete</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+        <div 
+          className="h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
+  );
+};
 
+return (
+  // Your existing JSX starts here...
 return (
 <div style={{
   backgroundColor: colors.cardBackground,
@@ -468,7 +494,7 @@ return (
   <h1 className="text-2xl font-bold text-gray-800 mb-1">AI Policy Generator</h1>
   <p className="text-sm text-gray-500">Create professional AI use policies in minutes</p>
 </div>
-        
+      {questionCount > 0 && !policyGenerated && <ProgressIndicator />}  
 <div className="flex flex-col space-y-3 overflow-auto flex-1 pr-1 mb-4">
           {messages.map((msg, i) => (
             <div
