@@ -334,7 +334,208 @@ const handlePrint = () => {
               font-size: 16px;
             }
           }
+       const handlePrint = () => {
+  const printWindow = window.open('', '_blank');
+  const formattedHtml = formatPolicyText(formattedPolicy);
+  
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>AI Use Policy</title>
+        <style>
+        .section-break {
+  height: 25px;
+}
+
+.paragraph-break {
+  height: 15px;
+}
+
+.signature-section {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f9fafb;
+}
+
+.signature-section h3 {
+  color: #1a365d;
+  font-size: 18px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #d69e2e;
+  padding-bottom: 8px;
+}
+
+.signature-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.signature-line {
+  font-size: 14px;
+  color: #4a5568;
+  padding: 8px 0;
+}
+
+.section-header {
+  color: #1a365d;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 25px 0 15px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #d69e2e;
+}
+
+.prohibited-list {
+  margin: 15px 0;
+  padding-left: 25px;
+}
+
+.prohibited-list li {
+  margin: 8px 0;
+  list-style-type: disc;
+  color: #e53e3e;
+  font-weight: 500;
+}
+
+.policy-content .section-header {
+  color: #1a365d;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #d69e2e;
+}
+
+.policy-content .prohibited-list {
+  margin: 15px 0;
+  padding-left: 20px;
+}
+
+.policy-content .prohibited-list li {
+  margin: 8px 0;
+  list-style-type: disc;
+  color: #e53e3e;
+  font-weight: 500;
+}
+
+          body { 
+            font-family: 'Georgia', 'Times New Roman', serif; 
+            line-height: 1.8; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 40px 20px;
+            color: #2c3e50;
+            background: white;
+          }
+          h1 { 
+            color: #1a365d; 
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #d69e2e;
+          }
+          h2 { 
+            color: #1a365d; 
+            font-size: 20px;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            padding-left: 15px;
+            border-left: 4px solid #d69e2e;
+          }
+          h3 {
+            color: #1a365d;
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+          }
+          ul { 
+            margin: 20px 0;
+            padding-left: 0;
+          }
+          li { 
+            margin: 12px 0;
+            padding-left: 20px;
+            list-style: none;
+            position: relative;
+          }
+          li:before {
+            content: "•";
+            color: #d69e2e;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+          }
+          p { 
+            text-align: justify;
+            margin-bottom: 15px;
+            color: #4a5568;
+          }
+          
+          .policy-content {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+          }
+
+          .policy-content h2 {
+            color: #1a365d;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            padding: 0;
+            border: none;
+          }
+
+          .policy-content ul {
+            margin: 15px 0;
+            padding-left: 20px;
+          }
+
+          .policy-content li {
+            margin: 8px 0;
+            list-style-type: disc;
+          }
+
+          .policy-content p {
+            margin: 12px 0;
+            line-height: 1.6;
+          }
+
+          @media (max-width: 640px) {
+            .policy-content {
+              font-size: 14px;
+              line-height: 1.5;
+            }
+            
+            .policy-content h2 {
+              font-size: 16px;
+            }
+          }
        
+          @media print {
+            body { 
+              padding: 20px; 
+              font-size: 12px;
+            }
+            h1 { font-size: 24px; }
+            h2 { font-size: 18px; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        ${formattedHtml}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
+};
           @media print {
             body { 
               padding: 20px; 
