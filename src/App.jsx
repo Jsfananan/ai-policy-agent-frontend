@@ -556,51 +556,49 @@ className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transi
 </div>
         )}
 
-        {policyGenerated && (
-          <div className="mt-6">
-            <div className="flex gap-3 mb-6 flex-wrap">
-              <button
-                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 flex items-center gap-2"
-                style={{backgroundColor: colors.circuitryBlue}}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = colors.candleGold;
-                  e.target.style.color = colors.navy;
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = colors.circuitryBlue;
-                  e.target.style.color = 'white';
-                }}
-                onClick={copyToClipboard}
-              >
-                📋 Copy to Clipboard
-              </button>
-            
-
-            
-            </div>
-            
-           <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
-  <div className="text-white p-4" 
-       style={{background: `linear-gradient(to right, ${colors.navy}, ${colors.circuitryBlue})`}}>
-    <h3 className="text-lg font-semibold flex items-center">
-      <span className="mr-2">📄</span>
-      Your Custom AI Use Policy
-    </h3>
+{policyGenerated && (
+  <div className="mt-8">
+    {/* Simple action buttons */}
+    <div className="flex gap-3 mb-6">
+      <button
+        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+        onClick={copyToClipboard}
+      >
+        Copy Policy
+      </button>
+      
+      <button
+        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+        onClick={handlePrint}
+      >
+        Print Policy
+      </button>
+    </div>
+    
+    {/* Clean document container */}
+    <div className="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden">
+      {/* Simple header */}
+      <div className="border-b border-gray-200 px-8 py-4 bg-gray-50">
+        <h3 className="text-lg font-semibold text-gray-900">AI Use Policy</h3>
+        <p className="text-sm text-gray-600 mt-1">Generated on {new Date().toLocaleDateString()}</p>
+      </div>
+      
+      {/* Document content */}
+      <div className="p-8 max-h-[600px] overflow-y-auto">
+        <div 
+          className="policy-document"
+          style={{
+            fontFamily: "'Georgia', 'Times New Roman', serif",
+            fontSize: '16px',
+            lineHeight: '1.8',
+            color: '#1f2937'
+          }}
+          dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
+        />
+      </div>
+    </div>
   </div>
-  <div className="p-4 sm:p-8 bg-gradient-to-br from-white to-gray-50 max-h-96 overflow-y-auto">
-    <div 
-      className="policy-document text-sm sm:text-base"
-      style={{
-        maxWidth: '100%',
-        wordWrap: 'break-word',
-        overflowWrap: 'break-word'
-      }}
-      dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
-    />
-  </div>
-</div>
-          </div>
-        )}
+)}
       </div>
     </div>
   );
