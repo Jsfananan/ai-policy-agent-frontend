@@ -481,8 +481,6 @@ const ProgressIndicator = () => {
 };
 
 return (
-  // Your existing JSX starts here...
-return (
 <div style={{
   backgroundColor: colors.cardBackground,
   color: colors.olive,
