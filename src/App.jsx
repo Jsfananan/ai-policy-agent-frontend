@@ -62,24 +62,43 @@ useEffect(() => {
 const formatPolicyText = (text) => {
   let formattedText = text.trim();
   
-  // Convert markdown-style headers
-  formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  formattedText = formattedText.replace(/^\*\*(.*?)\*\*$/gm, '<h2>$1</h2>');
+  // Add spacing between numbered sections (1., 2., 3., etc.)
+  formattedText = formattedText.replace(/(\d+\.\s)/g, '<div class="section-break"></div>$1');
   
-  // Convert bullet points
+  // Format section headers (numbers + text)
+  formattedText = formattedText.replace(/^(\d+\.\s)(.+?)$/gm, '<h3 class="section-header">$1$2</h3>');
+  
+  // Convert markdown-style headers and bold text
+  formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Handle prohibited use items - convert to bullet points
+  formattedText = formattedText.replace(
+    /The following uses of AI are prohibited:\s*([^\.]+)/g, 
+    'The following uses of AI are prohibited:<ul class="prohibited-list">$1</ul>'
+  );
+  
+  // Convert comma-separated prohibited items to list items
+  formattedText = formattedText.replace(
+    /<ul class="prohibited-list">([^<]+)<\/ul>/g,
+    (match, items) => {
+      const listItems = items.split(',').map(item => 
+        `<li>${item.trim()}</li>`
+      ).join('');
+      return `<ul class="prohibited-list">${listItems}</ul>`;
+    }
+  );
+  
+  // Convert regular bullet points
   formattedText = formattedText.replace(/^- (.*$)/gm, '<li>$1</li>');
   formattedText = formattedText.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
   
-  // Add proper spacing between sections
-  formattedText = formattedText.replace(/\n\n/g, '</p><div class="section-break"></div><p>');
-  
   // Handle signature section specially
   formattedText = formattedText.replace(
-    /Signature Section:(.*?)$/gms, 
-    '<div class="signature-section"><h3>Signature Section:</h3>$1</div>'
+    /(\d+\.\s)?User Acknowledgement.*?Signature Section:(.*?)$/gms, 
+    '<div class="signature-section"><h3>User Acknowledgement & Signature Section:</h3>$2</div>'
   );
   
-  // Format signature fields on separate lines
+  // Format signature fields
   formattedText = formattedText.replace(
     /Name:\s*_+\s*Title\/Role:\s*_+\s*Signature:\s*_+\s*Date:\s*_+/g,
     '<div class="signature-fields">' +
@@ -90,12 +109,16 @@ const formatPolicyText = (text) => {
     '</div>'
   );
   
+  // Add proper spacing between paragraphs
+  formattedText = formattedText.replace(/\n\n/g, '</p><div class="paragraph-break"></div><p>');
+  
+  // Clean up and wrap
   formattedText = '<p>' + formattedText + '</p>';
   
-  // Clean up
+  // Clean up empty paragraphs and fix nesting
   formattedText = formattedText.replace(/<p><\/p>/g, '');
-  formattedText = formattedText.replace(/<p><h2>/g, '<h2>');
-  formattedText = formattedText.replace(/<\/h2><\/p>/g, '</h2>');
+  formattedText = formattedText.replace(/<p><h3/g, '<h3');
+  formattedText = formattedText.replace(/<\/h3><\/p>/g, '</h3>');
   formattedText = formattedText.replace(/<p><ul>/g, '<ul>');
   formattedText = formattedText.replace(/<\/ul><\/p>/g, '</ul>');
   formattedText = formattedText.replace(/<p><div class="signature-section">/g, '<div class="signature-section">');
@@ -152,6 +175,7 @@ if (reply.includes('AI Use Policy for')) {
   // Remove any thank you messages at the end
   cleanedPolicy = cleanedPolicy.replace(/\n*.*thank you.*creating.*$/gi, '');
   cleanedPolicy = cleanedPolicy.replace(/\n*.*brought to you by.*$/gi, '');
+  cleanedPolicy = cleanedPolicy.replace(/If you need further adjustments.*responsible AI Use Policy!/gi, '');
   
   setFormattedPolicy(cleanedPolicy.trim());
   reply = '✅ Policy generated below';
