@@ -1,5 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+// Add this BEFORE export default function App()
+const BRAND_COLORS = {
+  cardBackground: '#F2D6CB',
+  olive: '#6b7280', 
+  navy: '#1e3a8a',
+  circuitryBlue: '#3b82f6',
+  candleGold: '#f59e0b',
+  warmCream: '#ffffff'
+};
 export default function App() {
   const [messages, setMessages] = useState([
     {
@@ -12,6 +20,50 @@ export default function App() {
   const [policyGenerated, setPolicyGenerated] = useState(false);
 const [formattedPolicy, setFormattedPolicy] = useState('');
 const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
+  // ADD these handlers right after your state declarations and before useEffect
+const handleKeyDown = useCallback((e) => {
+  if (e.key === 'Enter' && !isLoading && input.trim()) {
+    sendMessage();
+  }
+}, [input, isLoading]);
+
+const handleInputChange = useCallback((e) => {
+  setInput(e.target.value);
+}, []);
+
+const handleSendMessage = useCallback(() => {
+  sendMessage();
+}, []);
+
+const copyToClipboard = useCallback(async () => {
+  try {
+    const cleanText = formattedPolicy
+      .replace(/<[^>]*>/g, '')
+      .replace(/\n\s*\n/g, '\n\n')
+      .trim();
+    
+    await navigator.clipboard.writeText(cleanText);
+    
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '✅ Copied!';
+    button.style.backgroundColor = colors.candleGold;
+    
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.style.backgroundColor = colors.circuitryBlue;
+    }, 2000);
+    
+  } catch (err) {
+    const textArea = document.createElement('textarea');
+    textArea.value = formattedPolicy.replace(/<[^>]*>/g, '');
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    alert('✅ Policy copied to clipboard!');
+  }
+}, [formattedPolicy, colors]);
 const bottomRef = useRef(null);
   const inputRef = useRef(null); // Add this line
 const hasInteracted = useRef(false);
@@ -36,15 +88,7 @@ useEffect(() => {
 }, []);
 
 
-  // Define your brand colors
-  const colors = {
-    cardBackground: '#F2D6CB', // beige/cream background
-    olive: '#6b7280', // olive text color
-    navy: '#1e3a8a', // navy blue for headers
-    circuitryBlue: '#3b82f6', // blue for buttons/accents
-    candleGold: '#f59e0b', // gold for highlights
-    warmCream: '#ffffff' // warm cream for bot messages
-  };
+const colors = BRAND_COLORS;
 
 useEffect(() => {
   if (!hasInteracted.current) return; // skip scrolling on initial load
