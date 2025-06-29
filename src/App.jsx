@@ -425,37 +425,6 @@ const handlePrint = () => {
   printWindow.print();
 };
 
- const copyToClipboard = async () => {
-  try {
-    const cleanText = formattedPolicy
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/\n\s*\n/g, '\n\n')
-      .trim();
-    
-    await navigator.clipboard.writeText(cleanText);
-    
-    // Show better success feedback
-    const button = event.target;
-    const originalText = button.innerHTML;
-    button.innerHTML = '✅ Copied!';
-    button.style.backgroundColor = colors.success;
-    
-    setTimeout(() => {
-      button.innerHTML = originalText;
-      button.style.backgroundColor = colors.circuitryBlue;
-    }, 2000);
-    
-  } catch (err) {
-    // Fallback for older browsers
-    const textArea = document.createElement('textarea');
-    textArea.value = formattedPolicy.replace(/<[^>]*>/g, '');
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    alert('✅ Policy copied to clipboard!');
-  }
-};
 
 const downloadAsWord = () => {
   const cleanText = formattedPolicy.replace(/<[^>]*>/g, '').trim();
@@ -528,12 +497,8 @@ style={{
 <input
   ref={inputRef} // Add this line
   value={input}
-  onChange={(e) => setInput(e.target.value)}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' && !isLoading && input.trim()) {
-      sendMessage();
-    }
-  }}
+onChange={handleInputChange}
+onKeyDown={handleKeyDown}
   placeholder="Type your answer here..."
   disabled={isLoading}
   autoComplete="off"
@@ -545,7 +510,7 @@ style={{
   }}
 />
 <button
-  onClick={sendMessage}
+onClick={handleSendMessage}
   disabled={isLoading}
 className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50 shadow-sm"
   style={{ backgroundColor: isLoading ? '#9ca3af' : colors.circuitryBlue }}
