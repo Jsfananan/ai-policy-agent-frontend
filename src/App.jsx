@@ -23,21 +23,21 @@ const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
   const [questionCount, setQuestionCount] = useState(0);
 const [estimatedQuestions] = useState(9);
   // ADD these handlers right after your state declarations and before useEffect
-const handleKeyDown = useCallback((e) => {
+const handleKeyDown = (e) => {
   if (e.key === 'Enter' && !isLoading && input.trim()) {
     sendMessage();
   }
-}, [input, isLoading]);
+};
 
-const handleInputChange = useCallback((e) => {
+const handleInputChange = (e) => {
   setInput(e.target.value);
-}, []);
+};
 
-const handleSendMessage = useCallback(() => {
+const handleSendMessage = () => {
   sendMessage();
-}, []);
+};
 
-const copyToClipboard = useCallback(async () => {
+const copyToClipboard = async () => {
   try {
     const cleanText = formattedPolicy
       .replace(/<[^>]*>/g, '')
@@ -65,7 +65,7 @@ const copyToClipboard = useCallback(async () => {
     document.body.removeChild(textArea);
     alert('✅ Policy copied to clipboard!');
   }
-}, [formattedPolicy, colors]);
+};
 const bottomRef = useRef(null);
   const inputRef = useRef(null); // Add this line
 const hasInteracted = useRef(false);
