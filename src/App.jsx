@@ -471,50 +471,14 @@ const LoadingDots = () => (
 );
 // Add this component RIGHT AFTER LoadingDots
 const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
-  // Parse and format the policy sections
-  const parsePolicy = (text) => {
-    // Clean the text first
-    let cleaned = text
+  // Simple clean display - just clean and format the text
+  const cleanDisplayText = (text) => {
+    return text
       .replace(/AI Use Policy for.*?\n/g, '')
       .replace(/={3,}/g, '')
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove markdown bold
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .trim();
-    
-    // Split into sections and parse
-    const lines = cleaned.split('\n').filter(line => line.trim());
-    const sections = [];
-    let currentSection = null;
-    
-    for (let line of lines) {
-      line = line.trim();
-      if (!line) continue;
-      
-      // Check if it's a numbered section (1. Purpose, 2. Scope, etc.)
-      const sectionMatch = line.match(/^(\d+)\.\s+(.+)/);
-      if (sectionMatch) {
-        if (currentSection) sections.push(currentSection);
-        currentSection = {
-          number: sectionMatch[1],
-          title: sectionMatch[2],
-          content: []
-        };
-      } else if (line.includes('Definitions') || line.includes('📎')) {
-        if (currentSection) sections.push(currentSection);
-        currentSection = {
-          title: 'Definitions',
-          content: [],
-          isDefinitions: true
-        };
-      } else if (currentSection) {
-        currentSection.content.push(line);
-      }
-    }
-    
-    if (currentSection) sections.push(currentSection);
-    return sections;
   };
-
-  const sections = parsePolicy(policyText);
 
   return (
     <>
@@ -546,108 +510,17 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
           </p>
         </div>
 
-        {/* Content */}
+        {/* Content - Simple display of full policy */}
         <div className="p-8 max-h-[600px] overflow-y-auto">
-          {sections.map((section, index) => (
-            <div key={index} className="mb-8">
-              {/* Section Title */}
-              <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
-                {section.number ? `${section.number}. ${section.title}` : section.title}
-              </h3>
-              
-              {/* Section Content */}
-              <div className="text-gray-800 leading-relaxed space-y-3">
-                {section.isDefinitions ? (
-                  // Special formatting for definitions
-                  <div className="space-y-4">
-                    {section.content.map((line, idx) => {
-                      const colonIndex = line.indexOf(':');
-                      if (colonIndex > 0) {
-                        const term = line.substring(0, colonIndex + 1);
-                        const definition = line.substring(colonIndex + 1).trim();
-                        return (
-                          <div key={idx} className="border-l-4 border-blue-200 pl-4">
-                            <dt className="font-semibold text-gray-900 mb-1">{term}</dt>
-                            <dd className="text-gray-700 ml-4">{definition}</dd>
-                          </div>
-                        );
-                      }
-                      return <p key={idx}>{line}</p>;
-                    })}
-                  </div>
-                ) : (
-                  // Regular content
-                  section.content.map((line, idx) => {
-                    if (line.startsWith('- ')) {
-                      return (
-                        <div key={idx} className="flex items-start">
-                          <span className="text-blue-600 mr-2 mt-1">•</span>
-                          <span>{line.substring(2)}</span>
-                        </div>
-                      );
-                    }
-                    return <p key={idx} className="mb-3">{line}</p>;
-                  })
-                )}
-              </div>
-            </div>
-          ))}
-          
-          {/* Signature Section */}
-          <div className="border-t-2 border-gray-300 pt-8 mt-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
-              Employee Acknowledgment
-            </h3>
-            <p className="text-gray-800 mb-6 leading-relaxed">
-              By signing below, I acknowledge that I have read, understood, and agree to comply with 
-              the AI Use Policy outlined above. I understand that failure to comply with this policy 
-              may result in disciplinary action.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Employee Name (Print):
-                  </label>
-                  <div className="border-b-2 border-gray-300 h-8"></div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Employee Signature:
-                  </label>
-                  <div className="border-b-2 border-gray-300 h-8"></div>
-                </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title/Department:
-                  </label>
-                  <div className="border-b-2 border-gray-300 h-8"></div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Date:
-                  </label>
-                  <div className="border-b-2 border-gray-300 h-8"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-gray-200 pt-6 text-center mt-8">
-            <p className="text-sm text-gray-600">
-              This document is confidential and proprietary to {orgName || 'your organization'}.
-            </p>
-            <p className="text-sm text-gray-600 mt-2">
-              For questions regarding this policy, please contact your supervisor or HR department.
-            </p>
-          </div>
+          <div 
+            className="text-gray-800 leading-relaxed whitespace-pre-line"
+            dangerouslySetInnerHTML={{ 
+              __html: cleanDisplayText(policyText)
+                .replace(/\n\n/g, '</p><p class="mb-4">')
+                .replace(/^/, '<p class="mb-4">')
+                .replace(/$/, '</p>')
+            }}
+          />
         </div>
       </div>
     </>
