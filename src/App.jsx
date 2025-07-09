@@ -511,7 +511,7 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
         </div>
 
         {/* Content - Simple display of full policy */}
-        <div className="p-8 max-h-[600px] overflow-y-auto">
+<div className="p-8 max-h-[70vh] overflow-y-auto pb-12">
           <div 
             className="text-gray-800 leading-relaxed whitespace-pre-line"
             dangerouslySetInnerHTML={{ 
