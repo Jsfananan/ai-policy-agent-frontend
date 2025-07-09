@@ -470,11 +470,11 @@ const LoadingDots = () => (
   </div>
 );
 // Add this component RIGHT AFTER LoadingDots
-const ProfessionalPolicyDisplay = ({ policyText, orgName }) => {
+const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
   return (
     <>
       {/* Print-specific styles */}
-      <style jsx>{`
+      <style>{`
         @media print {
           body { 
             font-family: 'Times New Roman', serif !important;
@@ -545,20 +545,49 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName }) => {
             margin-bottom: 12pt !important;
           }
           
-          button, .no-print {
+          .no-print {
             display: none !important;
+          }
+        }
+        
+        @media screen {
+          .policy-container {
+            max-height: none !important;
+            overflow: visible !important;
+          }
+          
+          .policy-content-wrapper {
+            max-height: 70vh;
+            overflow-y: auto;
+            overflow-x: visible;
           }
         }
       `}</style>
 
-      <div className="print-container max-w-4xl mx-auto bg-white shadow-lg border border-gray-200">
+      {/* Action buttons - moved to top for visibility */}
+      <div className="no-print flex gap-3 mb-6 flex-wrap">
+        <button
+          onClick={() => window.print()}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        >
+          📄 Print Policy
+        </button>
+        <button
+          onClick={onCopy}
+          className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+        >
+          📋 Copy Text
+        </button>
+      </div>
+
+      <div className="policy-container print-container bg-white shadow-lg border border-gray-200 rounded-lg">
         {/* Document Header */}
-        <div className="print-header border-b-2 border-gray-800 p-8">
+        <div className="print-header border-b-2 border-gray-800 p-6 md:p-8">
           <div className="text-center">
-            <h1 className="print-title text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="print-title text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               AI Use Policy
             </h1>
-            <h2 className="print-org text-xl text-gray-700 mb-4">
+            <h2 className="print-org text-lg md:text-xl text-gray-700 mb-4">
               {orgName || 'Your Organization'}
             </h2>
             <div className="text-sm text-gray-600">
@@ -571,8 +600,8 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName }) => {
           </div>
         </div>
 
-        {/* Document Body */}
-        <div className="p-8 space-y-6">
+        {/* Scrollable Document Body */}
+        <div className="policy-content-wrapper p-6 md:p-8">
           <div 
             className="prose prose-lg max-w-none"
             style={{
@@ -643,22 +672,6 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName }) => {
               For questions regarding this policy, please contact your supervisor or HR department.
             </p>
           </div>
-        </div>
-
-        {/* Screen-only print button */}
-        <div className="p-4 text-center border-t border-gray-200 no-print">
-          <button 
-            onClick={() => window.print()}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mr-3"
-          >
-            Print Policy
-          </button>
-          <button
-            onClick={copyToClipboard}
-            className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition-colors"
-          >
-            Copy Text
-          </button>
         </div>
       </div>
     </>
@@ -765,6 +778,7 @@ className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transi
     <ProfessionalPolicyDisplay 
       policyText={formattedPolicy} 
       orgName={orgName}
+      onCopy={copyToClipboard}
     />
   </div>
 )}
