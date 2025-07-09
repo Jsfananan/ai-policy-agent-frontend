@@ -510,10 +510,10 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
           </p>
         </div>
 
-        {/* Content - Simple display of full policy */}
-<div className="p-8 max-h-[70vh] overflow-y-auto pb-12">
+{/* Content - Simple display of full policy */}
+        <div className="p-8 max-h-[65vh] overflow-y-auto">
           <div 
-            className="text-gray-800 leading-relaxed whitespace-pre-line"
+            className="text-gray-800 leading-relaxed whitespace-pre-line pb-16"
             dangerouslySetInnerHTML={{ 
               __html: cleanDisplayText(policyText)
                 .replace(/\n\n/g, '</p><p class="mb-4">')
