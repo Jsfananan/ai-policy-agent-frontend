@@ -513,11 +513,6 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
             text-align: center !important;
           }
           
-          .print-section {
-            margin-bottom: 18pt !important;
-            page-break-inside: avoid !important;
-          }
-          
           .print-section-title {
             font-size: 14pt !important;
             font-weight: bold !important;
@@ -528,8 +523,8 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
           .print-content {
             font-size: 12pt !important;
             line-height: 1.5 !important;
-            margin-left: 18pt !important;
             margin-bottom: 6pt !important;
+            font-weight: normal !important;
           }
           
           .print-signature {
@@ -548,6 +543,22 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
           .no-print {
             display: none !important;
           }
+          
+          /* Fix definition formatting for print */
+          .definition-item {
+            margin-bottom: 12pt !important;
+          }
+          
+          .definition-term {
+            font-weight: bold !important;
+            font-size: 12pt !important;
+          }
+          
+          .definition-desc {
+            font-weight: normal !important;
+            font-size: 12pt !important;
+            margin-left: 0 !important;
+          }
         }
         
         @media screen {
@@ -560,6 +571,23 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
             max-height: 70vh;
             overflow-y: auto;
             overflow-x: visible;
+          }
+          
+          /* Fix screen formatting */
+          .definition-item {
+            margin-bottom: 1rem;
+          }
+          
+          .definition-term {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+          }
+          
+          .definition-desc {
+            font-weight: normal;
+            color: #374151;
+            margin-left: 0;
           }
         }
       `}</style>
@@ -613,21 +641,30 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
               __html: policyText
                 .replace(/AI Use Policy for (.*?)(\n|$)/gm, '')
                 .replace(/={10,}/g, '')
+                // Fix section titles
                 .replace(/\*\*(.*?)\*\*/g, '<h3 class="print-section-title text-lg font-bold text-gray-900 mt-6 mb-3">$1</h3>')
                 .replace(/^(\d+)\.\s+(.*?)$/gm, '<h3 class="print-section-title text-lg font-bold text-gray-900 mt-6 mb-3">$1. $2</h3>')
+                // Fix definitions section
                 .replace(/📎\s*Definitions/g, '<h3 class="print-section-title text-lg font-bold text-gray-900 mt-8 mb-4 border-t border-gray-300 pt-6">Definitions</h3>')
-                .replace(/\n\n/g, '</p><p class="print-content mb-4">')
-                .replace(/^([A-Z][^:]*:)/gm, '<dt class="font-semibold text-gray-900 mb-1">$1</dt><dd class="text-gray-800 leading-relaxed ml-4 mb-4">')
+                // Fix paragraph formatting - remove bold from content
+                .replace(/\n\n/g, '</p><p class="print-content mb-4" style="font-weight: normal;">')
+                // Fix definition formatting - remove dots and fix layout
+                .replace(/^([A-Z][^:]*:)\s*/gm, '<div class="definition-item"><dt class="definition-term">$1</dt><dd class="definition-desc">')
+                .replace(/(<dd class="definition-desc">.*?)(\n|$)/gm, '$1</dd></div>')
+                // Fix bullet points
                 .replace(/^- (.*)/gm, '<li class="ml-4 mb-1">• $1</li>')
                 .replace(/(<li>.*<\/li>)/gs, '<ul class="mt-3 space-y-1">$1</ul>')
+                // Remove duplicate signature sections
+                .replace(/(\d+\.\s*)?User Acknowledgement.*?Signature Section:.*?$/gms, '')
+                .replace(/By signing below.*?Date:\s*_+/gs, '')
             }}
           />
           
-          {/* Professional Signature Section */}
+          {/* Single Professional Signature Section */}
           <section className="print-signature border-t border-gray-300 pt-8 space-y-6 mt-8">
             <h3 className="print-section-title text-lg font-bold text-gray-900">Employee Acknowledgment</h3>
-            <div className="text-gray-800 leading-relaxed">
-              <p className="mb-6">
+            <div className="text-gray-800 leading-relaxed" style={{fontWeight: 'normal'}}>
+              <p className="mb-6" style={{fontWeight: 'normal'}}>
                 By signing below, I acknowledge that I have read, understood, and agree to comply with 
                 the AI Use Policy outlined above. I understand that failure to comply with this policy 
                 may result in disciplinary action.
@@ -665,10 +702,10 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
 
           {/* Footer */}
           <div className="border-t border-gray-300 pt-6 text-center mt-8">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600" style={{fontWeight: 'normal'}}>
               This document is confidential and proprietary to {orgName || 'your organization'}.
             </p>
-            <p className="text-sm text-gray-600 mt-2">
+            <p className="text-sm text-gray-600 mt-2" style={{fontWeight: 'normal'}}>
               For questions regarding this policy, please contact your supervisor or HR department.
             </p>
           </div>
