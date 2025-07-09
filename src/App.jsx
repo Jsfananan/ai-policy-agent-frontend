@@ -223,8 +223,6 @@ if (reply.includes('AI Use Policy for')) {
     setOrgName(orgMatch[1].trim());
   }
   
-  // Clean the policy text by removing unwanted parts (your existing code continues here)
-  let cleanedPolicy = reply.trim();
   // Clean the policy text by removing unwanted parts
   let cleanedPolicy = reply.trim();
   
