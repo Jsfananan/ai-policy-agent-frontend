@@ -22,7 +22,9 @@ const [formattedPolicy, setFormattedPolicy] = useState('');
 const [isLoading, setIsLoading] = useState(false); // ADD THIS LINE
   const [questionCount, setQuestionCount] = useState(0);
 const [estimatedQuestions] = useState(9);
+  const [orgName, setOrgName] = useState('Your Organization');
   // ADD these handlers right after your state declarations and before useEffect
+  
 const handleKeyDown = (e) => {
   if (e.key === 'Enter' && !isLoading && input.trim()) {
     sendMessage();
@@ -214,6 +216,15 @@ setIsLoading(true); // ADD THIS LINE
 
 if (reply.includes('AI Use Policy for')) {
   setPolicyGenerated(true);
+  
+  // Extract organization name from the policy title
+  const orgMatch = reply.match(/AI Use Policy for (.*?)(\n|$)/);
+  if (orgMatch && orgMatch[1]) {
+    setOrgName(orgMatch[1].trim());
+  }
+  
+  // Clean the policy text by removing unwanted parts (your existing code continues here)
+  let cleanedPolicy = reply.trim();
   // Clean the policy text by removing unwanted parts
   let cleanedPolicy = reply.trim();
   
@@ -460,7 +471,202 @@ const LoadingDots = () => (
     </div>
   </div>
 );
-// ADD THIS RIGHT BEFORE YOUR return ( STATEMENT
+// Add this component RIGHT AFTER LoadingDots
+const ProfessionalPolicyDisplay = ({ policyText, orgName }) => {
+  return (
+    <>
+      {/* Print-specific styles */}
+      <style jsx>{`
+        @media print {
+          body { 
+            font-family: 'Times New Roman', serif !important;
+            font-size: 12pt !important;
+            line-height: 1.5 !important;
+            color: black !important;
+            background: white !important;
+          }
+          
+          .print-container {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            max-width: none !important;
+            background: white !important;
+          }
+          
+          .print-header {
+            border-bottom: 2px solid black !important;
+            margin-bottom: 24pt !important;
+            padding-bottom: 12pt !important;
+            background: white !important;
+          }
+          
+          .print-title {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            margin-bottom: 6pt !important;
+            text-align: center !important;
+          }
+          
+          .print-org {
+            font-size: 14pt !important;
+            margin-bottom: 6pt !important;
+            text-align: center !important;
+          }
+          
+          .print-section {
+            margin-bottom: 18pt !important;
+            page-break-inside: avoid !important;
+          }
+          
+          .print-section-title {
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            margin-bottom: 6pt !important;
+            margin-top: 12pt !important;
+          }
+          
+          .print-content {
+            font-size: 12pt !important;
+            line-height: 1.5 !important;
+            margin-left: 18pt !important;
+            margin-bottom: 6pt !important;
+          }
+          
+          .print-signature {
+            border-top: 1px solid black !important;
+            padding-top: 12pt !important;
+            margin-top: 24pt !important;
+            page-break-inside: avoid !important;
+          }
+          
+          .print-sig-line {
+            border-bottom: 1px solid black !important;
+            height: 24pt !important;
+            margin-bottom: 12pt !important;
+          }
+          
+          button, .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="print-container max-w-4xl mx-auto bg-white shadow-lg border border-gray-200">
+        {/* Document Header */}
+        <div className="print-header border-b-2 border-gray-800 p-8">
+          <div className="text-center">
+            <h1 className="print-title text-3xl font-bold text-gray-900 mb-2">
+              AI Use Policy
+            </h1>
+            <h2 className="print-org text-xl text-gray-700 mb-4">
+              {orgName || 'Your Organization'}
+            </h2>
+            <div className="text-sm text-gray-600">
+              <p>Effective Date: {new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Document Body */}
+        <div className="p-8 space-y-6">
+          <div 
+            className="prose prose-lg max-w-none"
+            style={{
+              fontSize: '16px',
+              lineHeight: '1.6',
+              color: '#374151'
+            }}
+            dangerouslySetInnerHTML={{ 
+              __html: policyText
+                .replace(/AI Use Policy for (.*?)(\n|$)/gm, '')
+                .replace(/={10,}/g, '')
+                .replace(/\*\*(.*?)\*\*/g, '<h3 class="print-section-title text-lg font-bold text-gray-900 mt-6 mb-3">$1</h3>')
+                .replace(/^(\d+)\.\s+(.*?)$/gm, '<h3 class="print-section-title text-lg font-bold text-gray-900 mt-6 mb-3">$1. $2</h3>')
+                .replace(/📎\s*Definitions/g, '<h3 class="print-section-title text-lg font-bold text-gray-900 mt-8 mb-4 border-t border-gray-300 pt-6">Definitions</h3>')
+                .replace(/\n\n/g, '</p><p class="print-content mb-4">')
+                .replace(/^([A-Z][^:]*:)/gm, '<dt class="font-semibold text-gray-900 mb-1">$1</dt><dd class="text-gray-800 leading-relaxed ml-4 mb-4">')
+                .replace(/^- (.*)/gm, '<li class="ml-4 mb-1">• $1</li>')
+                .replace(/(<li>.*<\/li>)/gs, '<ul class="mt-3 space-y-1">$1</ul>')
+            }}
+          />
+          
+          {/* Professional Signature Section */}
+          <section className="print-signature border-t border-gray-300 pt-8 space-y-6 mt-8">
+            <h3 className="print-section-title text-lg font-bold text-gray-900">Employee Acknowledgment</h3>
+            <div className="text-gray-800 leading-relaxed">
+              <p className="mb-6">
+                By signing below, I acknowledge that I have read, understood, and agree to comply with 
+                the AI Use Policy outlined above. I understand that failure to comply with this policy 
+                may result in disciplinary action.
+              </p>
+              
+              <div className="space-y-8 mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <div className="mb-2">
+                      <span className="text-sm font-medium text-gray-700">Employee Name (Print):</span>
+                    </div>
+                    <div className="print-sig-line border-b border-gray-400 h-8 mb-6"></div>
+                    
+                    <div className="mb-2">
+                      <span className="text-sm font-medium text-gray-700">Employee Signature:</span>
+                    </div>
+                    <div className="print-sig-line border-b border-gray-400 h-8"></div>
+                  </div>
+                  
+                  <div>
+                    <div className="mb-2">
+                      <span className="text-sm font-medium text-gray-700">Title/Department:</span>
+                    </div>
+                    <div className="print-sig-line border-b border-gray-400 h-8 mb-6"></div>
+                    
+                    <div className="mb-2">
+                      <span className="text-sm font-medium text-gray-700">Date:</span>
+                    </div>
+                    <div className="print-sig-line border-b border-gray-400 h-8"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <div className="border-t border-gray-300 pt-6 text-center mt-8">
+            <p className="text-sm text-gray-600">
+              This document is confidential and proprietary to {orgName || 'your organization'}.
+            </p>
+            <p className="text-sm text-gray-600 mt-2">
+              For questions regarding this policy, please contact your supervisor or HR department.
+            </p>
+          </div>
+        </div>
+
+        {/* Screen-only print button */}
+        <div className="p-4 text-center border-t border-gray-200 no-print">
+          <button 
+            onClick={() => window.print()}
+            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors mr-3"
+          >
+            Print Policy
+          </button>
+          <button
+            onClick={copyToClipboard}
+            className="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 transition-colors"
+          >
+            Copy Text
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
+  // ADD THIS RIGHT BEFORE YOUR return ( STATEMENT
 const ProgressIndicator = () => {
   const progress = Math.min((questionCount / estimatedQuestions) * 100, 95);
   
@@ -558,45 +764,10 @@ className="shrink-0 px-6 py-3 rounded-xl text-white text-sm font-semibold transi
 
 {policyGenerated && (
   <div className="mt-8">
-    {/* Simple action buttons */}
-    <div className="flex gap-3 mb-6">
-      <button
-        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
-        onClick={copyToClipboard}
-      >
-        Copy Policy
-      </button>
-      
-      <button
-        className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
-        onClick={handlePrint}
-      >
-        Print Policy
-      </button>
-    </div>
-    
-    {/* Clean document container */}
-    <div className="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden">
-      {/* Simple header */}
-      <div className="border-b border-gray-200 px-8 py-4 bg-gray-50">
-        <h3 className="text-lg font-semibold text-gray-900">AI Use Policy</h3>
-        <p className="text-sm text-gray-600 mt-1">Generated on {new Date().toLocaleDateString()}</p>
-      </div>
-      
-      {/* Document content */}
-      <div className="p-8 max-h-[600px] overflow-y-auto">
-        <div 
-          className="policy-document"
-          style={{
-            fontFamily: "'Georgia', 'Times New Roman', serif",
-            fontSize: '16px',
-            lineHeight: '1.8',
-            color: '#1f2937'
-          }}
-          dangerouslySetInnerHTML={{ __html: formatPolicyText(formattedPolicy) }}
-        />
-      </div>
-    </div>
+    <ProfessionalPolicyDisplay 
+      policyText={formattedPolicy} 
+      orgName={orgName}
+    />
   </div>
 )}
       </div>
