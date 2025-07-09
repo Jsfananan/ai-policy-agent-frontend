@@ -471,149 +471,73 @@ const LoadingDots = () => (
 );
 // Add this component RIGHT AFTER LoadingDots
 const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
-  // Clean and parse the policy text properly
-  const cleanPolicyText = (text) => {
-    // Remove the title line
-    let cleaned = text.replace(/AI Use Policy for.*?\n/g, '');
-    // Remove equals signs
-    cleaned = cleaned.replace(/={3,}/g, '');
-    // Remove any leading/trailing whitespace
-    cleaned = cleaned.trim();
-    return cleaned;
+  // Parse and format the policy sections
+  const parsePolicy = (text) => {
+    // Clean the text first
+    let cleaned = text
+      .replace(/AI Use Policy for.*?\n/g, '')
+      .replace(/={3,}/g, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove markdown bold
+      .trim();
+    
+    // Split into sections and parse
+    const lines = cleaned.split('\n').filter(line => line.trim());
+    const sections = [];
+    let currentSection = null;
+    
+    for (let line of lines) {
+      line = line.trim();
+      if (!line) continue;
+      
+      // Check if it's a numbered section (1. Purpose, 2. Scope, etc.)
+      const sectionMatch = line.match(/^(\d+)\.\s+(.+)/);
+      if (sectionMatch) {
+        if (currentSection) sections.push(currentSection);
+        currentSection = {
+          number: sectionMatch[1],
+          title: sectionMatch[2],
+          content: []
+        };
+      } else if (line.includes('Definitions') || line.includes('📎')) {
+        if (currentSection) sections.push(currentSection);
+        currentSection = {
+          title: 'Definitions',
+          content: [],
+          isDefinitions: true
+        };
+      } else if (currentSection) {
+        currentSection.content.push(line);
+      }
+    }
+    
+    if (currentSection) sections.push(currentSection);
+    return sections;
   };
+
+  const sections = parsePolicy(policyText);
 
   return (
     <>
-      {/* Print-specific styles */}
-      <style>{`
-        @media print {
-          body { 
-            font-family: 'Times New Roman', serif !important;
-            font-size: 12pt !important;
-            line-height: 1.5 !important;
-            color: black !important;
-            background: white !important;
-            margin: 0 !important;
-            padding: 20px !important;
-          }
-          
-          .policy-container {
-            box-shadow: none !important;
-            border: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            max-width: none !important;
-            background: white !important;
-          }
-          
-          .policy-header {
-            border-bottom: 2px solid black !important;
-            margin-bottom: 20px !important;
-            padding-bottom: 15px !important;
-          }
-          
-          .policy-title {
-            font-size: 18pt !important;
-            font-weight: bold !important;
-            text-align: center !important;
-            margin-bottom: 8px !important;
-          }
-          
-          .policy-org {
-            font-size: 14pt !important;
-            text-align: center !important;
-            margin-bottom: 8px !important;
-          }
-          
-          .policy-date {
-            font-size: 10pt !important;
-            text-align: center !important;
-          }
-          
-          .policy-content {
-            font-size: 12pt !important;
-            line-height: 1.6 !important;
-            white-space: pre-line !important;
-          }
-          
-          .signature-section {
-            border-top: 1px solid black !important;
-            margin-top: 30px !important;
-            padding-top: 20px !important;
-            page-break-inside: avoid !important;
-          }
-          
-          .signature-title {
-            font-size: 14pt !important;
-            font-weight: bold !important;
-            margin-bottom: 15px !important;
-          }
-          
-          .signature-text {
-            font-size: 12pt !important;
-            margin-bottom: 20px !important;
-          }
-          
-          .signature-grid {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 30px !important;
-            margin-top: 25px !important;
-          }
-          
-          .signature-field {
-            margin-bottom: 20px !important;
-          }
-          
-          .signature-label {
-            font-size: 10pt !important;
-            margin-bottom: 5px !important;
-          }
-          
-          .signature-line {
-            border-bottom: 1px solid black !important;
-            height: 20px !important;
-          }
-          
-          .no-print {
-            display: none !important;
-          }
-        }
-        
-        @media screen {
-          .policy-content-wrapper {
-            max-height: 600px;
-            overflow-y: auto;
-          }
-        }
-      `}</style>
-
-      {/* Action buttons */}
-      <div className="no-print flex gap-3 mb-6">
-        <button
-          onClick={() => window.print()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-        >
-          📄 Print Policy
-        </button>
+      {/* Simple copy button */}
+      <div className="flex justify-start mb-6">
         <button
           onClick={onCopy}
-          className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
         >
-          📋 Copy Text
+          📋 Copy Policy Text
         </button>
       </div>
 
-      <div className="policy-container bg-white shadow-lg border border-gray-200 rounded-lg">
+      <div className="bg-white shadow-lg border border-gray-200 rounded-lg overflow-hidden">
         {/* Header */}
-        <div className="policy-header border-b-2 border-gray-800 p-8">
-          <h1 className="policy-title text-3xl font-bold text-gray-900 text-center mb-2">
+        <div className="border-b-2 border-gray-800 p-8 bg-gray-50">
+          <h1 className="text-3xl font-bold text-gray-900 text-center mb-2">
             AI Use Policy
           </h1>
-          <h2 className="policy-org text-xl text-gray-700 text-center mb-4">
+          <h2 className="text-xl text-gray-700 text-center mb-4">
             {orgName || 'Your Organization'}
           </h2>
-          <p className="policy-date text-sm text-gray-600 text-center">
+          <p className="text-sm text-gray-600 text-center">
             Effective Date: {new Date().toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'long', 
@@ -623,59 +547,100 @@ const ProfessionalPolicyDisplay = ({ policyText, orgName, onCopy }) => {
         </div>
 
         {/* Content */}
-        <div className="policy-content-wrapper p-8">
-          <div className="policy-content text-gray-800 leading-relaxed whitespace-pre-line">
-            {cleanPolicyText(policyText)}
-          </div>
+        <div className="p-8 max-h-[600px] overflow-y-auto">
+          {sections.map((section, index) => (
+            <div key={index} className="mb-8">
+              {/* Section Title */}
+              <h3 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                {section.number ? `${section.number}. ${section.title}` : section.title}
+              </h3>
+              
+              {/* Section Content */}
+              <div className="text-gray-800 leading-relaxed space-y-3">
+                {section.isDefinitions ? (
+                  // Special formatting for definitions
+                  <div className="space-y-4">
+                    {section.content.map((line, idx) => {
+                      const colonIndex = line.indexOf(':');
+                      if (colonIndex > 0) {
+                        const term = line.substring(0, colonIndex + 1);
+                        const definition = line.substring(colonIndex + 1).trim();
+                        return (
+                          <div key={idx} className="border-l-4 border-blue-200 pl-4">
+                            <dt className="font-semibold text-gray-900 mb-1">{term}</dt>
+                            <dd className="text-gray-700 ml-4">{definition}</dd>
+                          </div>
+                        );
+                      }
+                      return <p key={idx}>{line}</p>;
+                    })}
+                  </div>
+                ) : (
+                  // Regular content
+                  section.content.map((line, idx) => {
+                    if (line.startsWith('- ')) {
+                      return (
+                        <div key={idx} className="flex items-start">
+                          <span className="text-blue-600 mr-2 mt-1">•</span>
+                          <span>{line.substring(2)}</span>
+                        </div>
+                      );
+                    }
+                    return <p key={idx} className="mb-3">{line}</p>;
+                  })
+                )}
+              </div>
+            </div>
+          ))}
           
-          {/* Single Signature Section */}
-          <div className="signature-section border-t border-gray-300 mt-8 pt-8">
-            <h3 className="signature-title text-lg font-bold text-gray-900 mb-4">
+          {/* Signature Section */}
+          <div className="border-t-2 border-gray-300 pt-8 mt-8">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
               Employee Acknowledgment
             </h3>
-            <p className="signature-text text-gray-800 mb-6">
+            <p className="text-gray-800 mb-6 leading-relaxed">
               By signing below, I acknowledge that I have read, understood, and agree to comply with 
               the AI Use Policy outlined above. I understand that failure to comply with this policy 
               may result in disciplinary action.
             </p>
             
-            <div className="signature-grid grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-              <div>
-                <div className="signature-field">
-                  <div className="signature-label text-sm font-medium text-gray-700 mb-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Employee Name (Print):
-                  </div>
-                  <div className="signature-line border-b border-gray-400 h-8"></div>
+                  </label>
+                  <div className="border-b-2 border-gray-300 h-8"></div>
                 </div>
                 
-                <div className="signature-field">
-                  <div className="signature-label text-sm font-medium text-gray-700 mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Employee Signature:
-                  </div>
-                  <div className="signature-line border-b border-gray-400 h-8"></div>
+                  </label>
+                  <div className="border-b-2 border-gray-300 h-8"></div>
                 </div>
               </div>
               
-              <div>
-                <div className="signature-field">
-                  <div className="signature-label text-sm font-medium text-gray-700 mb-2">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Title/Department:
-                  </div>
-                  <div className="signature-line border-b border-gray-400 h-8"></div>
+                  </label>
+                  <div className="border-b-2 border-gray-300 h-8"></div>
                 </div>
                 
-                <div className="signature-field">
-                  <div className="signature-label text-sm font-medium text-gray-700 mb-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Date:
-                  </div>
-                  <div className="signature-line border-b border-gray-400 h-8"></div>
+                  </label>
+                  <div className="border-b-2 border-gray-300 h-8"></div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-300 pt-6 text-center mt-8">
+          <div className="border-t border-gray-200 pt-6 text-center mt-8">
             <p className="text-sm text-gray-600">
               This document is confidential and proprietary to {orgName || 'your organization'}.
             </p>
